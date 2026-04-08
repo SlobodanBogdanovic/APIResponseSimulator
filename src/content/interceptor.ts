@@ -1,5 +1,5 @@
-// Requires Chrome 102+ — chrome.storage available in MAIN world content scripts
 // Requires Chrome 111+ — "world": "MAIN" supported in manifest content_scripts
+// chrome.storage is NOT used here — see bridge.ts (ISOLATED world) for storage access
 
 // ─── Inline types (no imports allowed in IIFE build) ───────────────────────
 
@@ -141,17 +141,16 @@ XMLHttpRequest.prototype.send = function(body?: Document | XMLHttpRequestBodyIni
   respond()
 }
 
-// ─── Load rules async (patch already applied above with empty rules) ────────
+// ─── Receive rules from the ISOLATED world bridge via postMessage ────────────
+// chrome.storage is NOT reliable in MAIN world on all pages (the host page's
+// own JS can shadow/overwrite the chrome global). The bridge.ts content script
+// runs in the ISOLATED world where chrome APIs are always available, and it
+// forwards rules here via window.postMessage.
 
-chrome.storage.local.get(['rules', 'settings'], (result) => {
-  rules    = result['rules']    ?? []
-  settings = result['settings'] ?? { extensionEnabled: true }
-})
-
-// ─── Sync on change — update variables only, never re-run patch code ────────
-
-chrome.storage.onChanged.addListener((changes, area) => {
-  if (area !== 'local') return
-  if (changes['rules'])    rules    = changes['rules'].newValue    ?? []
-  if (changes['settings']) settings = changes['settings'].newValue ?? { extensionEnabled: true }
+window.addEventListener('message', (event) => {
+  if (event.source !== window) return
+  const data = event.data
+  if (!data || data.__source !== '__ninja_interceptor_bridge__') return
+  if (Array.isArray(data.rules))    rules    = data.rules
+  if (data.settings != null)        settings = data.settings
 })

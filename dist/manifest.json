@@ -19,6 +19,12 @@
       "js": ["content/interceptor.js"],
       "run_at": "document_start",
       "world": "MAIN"
+    },
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content/bridge.js"],
+      "run_at": "document_start",
+      "world": "ISOLATED"
     }
   ],
   "action": {
