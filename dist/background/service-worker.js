@@ -1,0 +1,1 @@
+chrome.runtime.onInstalled.addListener(()=>{chrome.storage.local.get([`settings`,`rules`],e=>{let t={};e.settings||(t.settings={extensionEnabled:!0}),e.rules||(t.rules=[]),Object.keys(t).length&&chrome.storage.local.set(t)})}),chrome.runtime.onMessage.addListener(e=>{e.type===`OPEN_OPTIONS`&&chrome.runtime.openOptionsPage()});
