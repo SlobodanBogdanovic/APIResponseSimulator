@@ -14,6 +14,16 @@ Intercept HTTP requests (fetch and XHR) in the browser and return fake responses
 
 ---
 
+## Limitations and scope
+
+- Only intercepts `fetch` and `XMLHttpRequest` calls made by **page JavaScript**. Requests from other extensions, the browser itself, native apps, or Service Workers running inside the page are **not** intercepted.
+- Matches on **URL + method only**. Request body, request headers, and query-string-aware matching are not supported beyond what `*` / `?` globs cover.
+- Patterns are **glob-style** (`*` matches any characters, `?` matches one character, case-insensitive). Regular expressions are not supported.
+- Rules are stored per browser profile via `chrome.storage.local`. They **do not sync** across browsers or machines.
+- Rules apply to **every tab** the extension is enabled on. There is no per-origin or per-tab scoping.
+
+---
+
 ## Installation
 
 ### Option A — Load from this repo (no build needed)
@@ -25,6 +35,8 @@ Intercept HTTP requests (fetch and XHR) in the browser and return fake responses
 5. Select the **`dist`** folder inside the project
 
 > The `dist` folder is pre-built and committed — you do not need Node.js or npm to use the extension.
+
+After running `git pull` later on, click the **refresh icon** on the extension card in `chrome://extensions` so Chrome picks up the updated `dist`.
 
 ### Option B — Build from source
 
@@ -70,6 +82,56 @@ Go to your application page and refresh it. Matching requests will now be interc
 
 ---
 
+## Common scenarios
+
+Short recipes for the situations that come up most often. Each one is a single rule you can add from the Options page.
+
+### Confirm interception is working
+
+Before adding any real rules, prove the wiring is good with a catch-all:
+
+| Field | Value |
+|---|---|
+| URL pattern | `*` |
+| Method | `ANY` |
+| Status code | `200` |
+| Response body | `{"mocked": true}` |
+
+Refresh your app tab. Every request will now return `{"mocked": true}`. Disable or delete the rule once you've confirmed it.
+
+### Simulate a server error
+
+Test how your UI surfaces failures without touching the backend:
+
+| Field | Value |
+|---|---|
+| URL pattern | `localhost:8080/api/orders` |
+| Method | `POST` |
+| Status code | `500` |
+| Response body | `{"error": "Internal server error"}` |
+
+### Simulate a slow network
+
+Use the **Delay (ms)** field to see loading spinners, skeletons, and timeout handling:
+
+| Field | Value |
+|---|---|
+| URL pattern | `localhost:8080/api/v1/users` |
+| Method | `GET` |
+| Status code | `200` |
+| Response body | `[{"id": 1, "name": "Alice"}]` |
+| Delay (ms) | `3000` |
+
+### Test empty-list state
+
+Create a rule with the same URL pattern as your real list endpoint, set the body to `[]`, and toggle the rule on/off to flip between populated and empty results.
+
+### Cover both dev and staging with one rule
+
+A pattern like `*/api/v1/users` matches `localhost:8080/api/v1/users`, `staging.example.com/api/v1/users`, and any other host that exposes the same path. The leading `*` swallows the host and protocol.
+
+---
+
 ## URL pattern syntax
 
 Patterns match against both the full URL and the protocol-stripped URL, so you can omit `http://`.
@@ -98,7 +160,7 @@ Toggle the switch on the rule card in the Options page, or use the per-rule togg
 
 ### Enable / disable all interception
 
-Click the extension icon → use the toggle in the purple header bar. When grey, all requests pass through regardless of rules.
+Click the extension icon → use the toggle in the indigo header bar. When grey, all requests pass through regardless of rules.
 
 ### Edit a rule
 
@@ -107,6 +169,44 @@ Click **Edit** on the rule card. All fields can be changed. Click **Save rule**.
 ### Delete a rule
 
 Click **Delete** on the rule card → confirm with **Confirm**. No browser dialogs are used.
+
+### Reset / clear all rules
+
+- **Per-rule:** Delete each rule from the Options page using the flow above.
+- **Wipe everything:** Remove the extension from `chrome://extensions` and load it again. On reinstall, the service worker re-seeds an empty rule list and default settings.
+
+### Import / Export rules
+
+Use the **Export** and **Import** buttons in the Options page header to move rules between browsers, profiles, or teammates.
+
+- **Export** downloads all your current rules as `ninja-interceptor-rules-YYYY-MM-DD.json`.
+- **Import** reads a JSON file and **appends** its rules to your existing list. Existing rules are never modified or removed, and imported rules are assigned fresh IDs to avoid collisions.
+- Invalid entries (missing `name`, `urlPattern`, `method`, or `statusCode`) are skipped, and the count appears in the inline status message.
+
+The export file format is:
+
+```json
+{
+  "version": 1,
+  "exportedAt": "2026-04-25T12:00:00.000Z",
+  "rules": [
+    {
+      "id": "…",
+      "name": "Get timezone zone",
+      "enabled": true,
+      "method": "GET",
+      "urlPattern": "localhost:8080/api/v1/lockerconf/datetime/zone",
+      "statusCode": 200,
+      "responseBody": "{\"zone\":\"Europe/London\"}",
+      "responseHeaders": [],
+      "delayMs": 0,
+      "createdAt": 1714041600000
+    }
+  ]
+}
+```
+
+Import also accepts a bare array of rule objects for convenience.
 
 ---
 
@@ -194,6 +294,14 @@ The response body likely doesn't match the shape your application code expects. 
 ### `chrome.storage` errors in the console
 
 This was a known issue in earlier versions where the extension tried to access `chrome.storage` in the MAIN world. It is fixed by the isolated-world bridge architecture — `bridge.js` reads storage in the ISOLATED world and forwards rules via `postMessage`. No action needed.
+
+---
+
+## Permissions
+
+The manifest requests `host_permissions: ["<all_urls>"]` so the content script can be injected into every page — that's what lets you mock requests on any host you visit, not just `localhost`. The only Chrome API permission requested is `"storage"`, used to persist your rules locally.
+
+Nothing is sent over the network by the extension itself. Intercepted requests are answered from your own configured response bodies and never leave the browser.
 
 ---
 

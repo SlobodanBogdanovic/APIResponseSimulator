@@ -34,6 +34,17 @@ export function toggleRule(id: string, enabled: boolean): Promise<void> {
   )
 }
 
+export function importRules(incoming: MockRule[]): Promise<void> {
+  return getRules().then((existing) => {
+    const withNewIds = incoming.map((r) => ({
+      ...r,
+      id: crypto.randomUUID(),
+      createdAt: r.createdAt ?? Date.now(),
+    }))
+    return saveRules([...existing, ...withNewIds])
+  })
+}
+
 export function getSettings(): Promise<ExtensionSettings> {
   return new Promise((resolve) => {
     chrome.storage.local.get(['settings'], (result) => {

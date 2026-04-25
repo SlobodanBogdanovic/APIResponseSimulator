@@ -1,8 +1,16 @@
 import { useEffect, useState } from 'react'
 import type { MockRule } from '../shared/types'
-import { getRules, addRule, updateRule, deleteRule, toggleRule } from '../shared/storage'
+import {
+  getRules,
+  addRule,
+  updateRule,
+  deleteRule,
+  toggleRule,
+  importRules,
+} from '../shared/storage'
 import { RuleList } from './components/RuleList'
 import { RuleForm } from './components/RuleForm'
+import { ImportExportButtons } from './components/ImportExportButtons'
 
 export function Options() {
   const [rules, setRules] = useState<MockRule[]>([])
@@ -55,6 +63,11 @@ export function Options() {
     await refresh()
   }
 
+  const handleImport = async (imported: MockRule[]) => {
+    await importRules(imported)
+    await refresh()
+  }
+
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-4xl mx-auto px-4 py-8">
@@ -65,13 +78,16 @@ export function Options() {
             <p className="text-sm text-gray-500 mt-1">Manage your HTTP mock rules</p>
           </div>
           {!showForm && (
-            <button
-              onClick={handleAdd}
-              className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-            >
-              <span className="text-lg leading-none">+</span>
-              Add rule
-            </button>
+            <div className="flex items-center gap-2">
+              <ImportExportButtons rules={rules} onImport={handleImport} />
+              <button
+                onClick={handleAdd}
+                className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+              >
+                <span className="text-lg leading-none">+</span>
+                Add rule
+              </button>
+            </div>
           )}
         </div>
 
