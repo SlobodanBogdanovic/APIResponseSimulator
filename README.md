@@ -1,4 +1,4 @@
-# NinjaInterceptor — API Mock Chrome Extension
+# API Mock Chrome Extension
 
 Intercept HTTP requests (fetch and XHR) in the browser and return fake responses — without the real server ever being called. Built for front-end developers who need to mock APIs during development, testing, or demos.
 
