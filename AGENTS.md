@@ -39,8 +39,11 @@ when files change. Load `dist/` as an unpacked extension.
 2. `vite build --config vite.content.config.ts` — interceptor IIFE. `emptyOutDir: false`.
 3. `vite build --config vite.bridge.config.ts` — bridge IIFE. `emptyOutDir: false`.
 
-Before saying work is done, run lint, typecheck, build, and test. Paste the
-output. List what you did not verify.
+When the invoked role is Dev, run lint, typecheck, build, and test before
+saying the implementation is done. Paste the output. List what you did not
+verify. role-tester runs lint, typecheck, and the existing tests, reports the
+output, does not fix code, and stops at its handoff. Spec and QA stop at their
+handoff and do not run that suite. The agent never starts the next role.
 
 ---
 
@@ -79,8 +82,9 @@ its closure variables from that message. It never calls `chrome.storage`.
   `chrome.storage.local` from React components. Storage functions return Promises.
 - Do not use `window.confirm()`. Use inline confirmation.
 - One spec, one branch, one PR. Specs live in `specs/NNN-name.md`.
-- QA writes `e2e/` tests before implementation. DEV does not edit those tests.
-- Workflow: `docs/agent-workflow.md`. Run log: `docs/agent-runs.csv`.
+- The workflow is a human-gated pipeline. The agent never advances it on its own. Finish the invoked role, print the handoff line, and stop. The human opens the next chat.
+- Flow: Spec → QA requirements review → (human) → Dev → role-tester acceptance check → (human: manual test) → PR → CI → merge. Details: `docs/agent-workflow.md`. Run log: `docs/agent-runs.csv`.
+- QA validates requirements from the user's point of view. It does not write Playwright tests. `@role-qa` or `/role-qa` plus a spec path is that requirements review. role-tester does the acceptance check, does not write Playwright tests, and does not fix code. Existing `e2e/` tests and CI stay as they are.
 - Internal names stay: `MockRule`, storage keys `rules` and `settings`, bridge
   message source `__ninja_interceptor_bridge__`. Renaming them breaks installs
   or splits the bridge from the interceptor.
@@ -104,11 +108,12 @@ its closure variables from that message. It never calls `chrome.storage`.
 - No destructive commands (`rm -rf`, force push, dropping data) without asking first.
 - Show a short plan before any multi-file change.
 - If requirements are ambiguous, ask. Do not guess.
-- Run lint, typecheck, and tests before saying "done". Report the actual output and never claim something passes without running it.
+- When the invoked role is Dev, run lint, typecheck, build, and test before saying the implementation is done. Report the actual output and never claim something passes without running it. role-tester runs lint, typecheck, and the existing tests, reports the output, does not fix code, and stops at its handoff. Spec and QA stop at their handoff and do not run that suite.
 - Always list what you did NOT verify.
 
-Roles: `@role-spec`, `@role-qa`, `@role-dev`. They apply only when @-mentioned.
-`project-core` applies to every session.
+Roles are Cursor subagents in `.cursor/agents/`: `@role-spec`, `@role-qa`, `@role-dev`, and `@role-tester`. Invoke one with that @ name, or from the `/` menu (`/role-spec`, `/role-qa`, `/role-dev`, `/role-tester`).
+In each chat, act in exactly one role. If no role is invoked, ask which role.
+`project-core` applies to every session, including ROLE BOUNDARIES. Each subagent prompt ends with DONE and a handoff line. When a subagent returns, report its result and STOP. Never start the next role on your own.
 
 ---
 
