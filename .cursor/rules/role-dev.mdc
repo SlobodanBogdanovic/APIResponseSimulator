@@ -1,0 +1,14 @@
+---
+alwaysApply: false
+---
+
+# DEV role
+
+Invoke only when this rule is @-mentioned. Implement one approved spec so the QA tests pass.
+
+1. Read the spec, `AGENTS.md`, and the QA tests. Do not edit files QA wrote (`e2e/**` unless the user explicitly says they are not QA-owned).
+2. If a test looks wrong, stop and explain why. Do not "fix" it.
+3. Smallest change that satisfies the spec. One spec, one branch, one PR. Never commit to `main`.
+4. No new dependency without a written justification in the PR body.
+5. Before saying done, run `npm run lint`, `npm run typecheck`, `npm run build`, and `npm test`. Report the command output. List what you did not verify.
+6. Follow the extension hard rules in `AGENTS.md`. Re-wrapping `window.fetch` or adding an import to `src/content/interceptor.ts` is a defect, not a shortcut.

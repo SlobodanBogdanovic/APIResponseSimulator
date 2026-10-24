@@ -1,0 +1,25 @@
+---
+description: Guardrails for every change in API Response Simulator
+alwaysApply: true
+---
+
+# Project core
+
+Read `AGENTS.md` before changing this repo. It is the source of truth for extension hard rules (content-script patches, manifest, Vite builds, URL matching, XHR event order).
+
+This is a Manifest V3 Chrome extension. There is no web server. `npm run dev` only rebuilds `dist/` on change.
+
+## Guardrails
+
+- Never commit to `main`. Work on a branch and open a PR.
+- Never read or write `.env` files or secrets. No calls to production systems.
+- No new dependencies without a written justification in the PR.
+- No destructive commands (`rm -rf`, force push, dropping data) without asking first.
+- Show a short plan before any multi-file change.
+- If requirements are ambiguous, ask. Do not guess.
+- Run lint, typecheck, and tests before saying "done". Report the actual output and never claim something passes without running it.
+- Always list what you did NOT verify.
+
+## Product
+
+User-facing name is **API Response Simulator**. Do not rename `MockRule`, storage keys, or the bridge message source `__ninja_interceptor_bridge__`.

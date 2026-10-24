@@ -1,4 +1,4 @@
-# NinjaInterceptor — API Mock Chrome Extension
+# API Response Simulator
 
 Intercept HTTP requests (fetch and XHR) in the browser and return fake responses — without the real server ever being called. Built for front-end developers who need to mock APIs during development, testing, or demos.
 
@@ -54,7 +54,7 @@ Then load the `dist` folder as above.
 
 ### 1. Pin the extension
 
-After loading, click the puzzle icon in Chrome's toolbar and pin **API Mock Interceptor**.
+After loading, click the puzzle icon in Chrome's toolbar and pin **API Response Simulator**.
 
 ### 2. Open Settings
 
@@ -179,7 +179,7 @@ Click **Delete** on the rule card → confirm with **Confirm**. No browser dialo
 
 Use the **Export** and **Import** buttons in the Options page header to move rules between browsers, profiles, or teammates.
 
-- **Export** downloads all your current rules as `ninja-interceptor-rules-YYYY-MM-DD.json`.
+- **Export** downloads all your current rules as `api-response-simulator-rules-YYYY-MM-DD.json`.
 - **Import** reads a JSON file and **appends** its rules to your existing list. Existing rules are never modified or removed, and imported rules are assigned fresh IDs to avoid collisions.
 - Invalid entries (missing `name`, `urlPattern`, `method`, or `statusCode`) are skipped, and the count appears in the inline status message.
 
@@ -346,7 +346,13 @@ npm run icons
 npm run build
 
 # Build and watch for changes
-npm run build:watch
+npm run dev
+
+# Lint, typecheck, and Playwright (build first — tests load dist/)
+npm run lint
+npm run typecheck
+npm run build
+npm test
 ```
 
 After any code change: run `npm run build`, then click the **refresh icon** on the extension card in `chrome://extensions`, and reload your app tab.
