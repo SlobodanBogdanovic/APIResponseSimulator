@@ -1,1 +1,1 @@
-date,task,role,model,duration_min,cost_estimate_eur,ci_passed_first_try,human_corrections,notes
+date,task,role,model,duration_min,cost_estimate_eur,ci_passed_first_try,human_corrections,qa_findings_accepted,notes
