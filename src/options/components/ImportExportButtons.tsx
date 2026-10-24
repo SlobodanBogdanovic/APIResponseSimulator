@@ -129,7 +129,7 @@ export function ImportExportButtons({ rules, onImport }: ImportExportButtonsProp
       const url = URL.createObjectURL(blob)
       const a = document.createElement('a')
       a.href = url
-      a.download = `ninja-interceptor-rules-${todayStamp()}.json`
+      a.download = `api-response-simulator-rules-${todayStamp()}.json`
       document.body.appendChild(a)
       a.click()
       document.body.removeChild(a)

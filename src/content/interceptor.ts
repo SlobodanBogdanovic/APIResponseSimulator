@@ -93,7 +93,7 @@ const _originalSend = XMLHttpRequest.prototype.send
 XMLHttpRequest.prototype.open = function(
   method: string,
   url: string | URL,
-  async = true,
+  async: boolean = true,
   user?: string | null,
   password?: string | null
 ) {
@@ -111,31 +111,31 @@ XMLHttpRequest.prototype.send = function(body?: Document | XMLHttpRequestBodyIni
   )
   if (!rule) { _originalSend.call(this, body); return }
 
-  const self = this
+  const matched = rule
 
-  async function respond() {
-    if (rule.delayMs > 0) await sleep(rule.delayMs)
+  const respond = async () => {
+    if (matched.delayMs > 0) await sleep(matched.delayMs)
 
-    Object.defineProperties(self, {
+    Object.defineProperties(this, {
       readyState:   { configurable: true, get: () => 4 },
-      status:       { configurable: true, get: () => rule.statusCode },
-      statusText:   { configurable: true, get: () => String(rule.statusCode) },
-      responseText: { configurable: true, get: () => rule.responseBody },
-      response:     { configurable: true, get: () => rule.responseBody },
+      status:       { configurable: true, get: () => matched.statusCode },
+      statusText:   { configurable: true, get: () => String(matched.statusCode) },
+      responseText: { configurable: true, get: () => matched.responseBody },
+      response:     { configurable: true, get: () => matched.responseBody },
     })
 
     // Fire in correct order: readystatechange → load → loadend
     const rscEvt = new Event('readystatechange')
-    self.dispatchEvent(rscEvt)
-    if (typeof self.onreadystatechange === 'function') self.onreadystatechange.call(self, rscEvt)
+    this.dispatchEvent(rscEvt)
+    if (typeof this.onreadystatechange === 'function') this.onreadystatechange.call(this, rscEvt)
 
     const loadEvt = new ProgressEvent('load', { lengthComputable: false, loaded: 0, total: 0 })
-    self.dispatchEvent(loadEvt)
-    if (typeof self.onload === 'function') self.onload.call(self, loadEvt)
+    this.dispatchEvent(loadEvt)
+    if (typeof this.onload === 'function') this.onload.call(this, loadEvt)
 
     const endEvt = new ProgressEvent('loadend', { lengthComputable: false, loaded: 0, total: 0 })
-    self.dispatchEvent(endEvt)
-    if (typeof self.onloadend === 'function') self.onloadend.call(self, endEvt)
+    this.dispatchEvent(endEvt)
+    if (typeof this.onloadend === 'function') this.onloadend.call(this, endEvt)
   }
 
   respond()

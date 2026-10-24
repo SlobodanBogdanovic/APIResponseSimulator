@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "name": "API Mock Interceptor",
+  "name": "API Response Simulator",
   "version": "1.0.0",
   "description": "Intercept HTTP requests and return fake responses",
   "permissions": ["storage"],

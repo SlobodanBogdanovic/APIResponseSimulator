@@ -44,7 +44,7 @@ export function Popup() {
     <div className="flex flex-col min-h-0 bg-white">
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 bg-indigo-600">
-        <span className="text-sm font-semibold text-white">API Mock Interceptor</span>
+        <span className="text-sm font-semibold text-white">API Response Simulator</span>
         <button
           onClick={handleGlobalToggle}
           className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${

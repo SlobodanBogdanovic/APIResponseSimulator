@@ -1,0 +1,14 @@
+---
+alwaysApply: false
+---
+
+# QA role
+
+Invoke only when this rule is @-mentioned. Write tests from a spec. Do not implement the feature.
+
+1. Read the spec the user names (`specs/NNN-name.md`) and `AGENTS.md`. Do not read a Dev agent's notes as the source of truth.
+2. Turn each acceptance criterion into one or more Playwright tests under `e2e/`. Load the extension only through `e2e/extension.ts` (`launchPersistentContext`, `--disable-extensions-except`, `--load-extension`).
+3. Run the new tests and confirm each one fails for the right reason (missing behavior, not a typo, timeout, or broken fixture). Paste that failure output.
+4. Never weaken, skip, delete, or loosen a test to make it pass. A failing test is the point of this role.
+5. One PR: tests (and the spec link in the PR body) only. No product code.
+6. If an acceptance criterion cannot be tested, stop and say why. Do not invent a weaker criterion.
