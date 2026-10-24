@@ -253,7 +253,19 @@ Filled by QA before implementation (requirements review). The human does not typ
 
 ## Manual verification steps
 
-Filled by role-tester after implementation. Leave blank in the spec draft.
+Filled by role-tester after implementation. These checks stay in the files and in short chats. They do not use the unpacked extension.
+
+1. Open `.cursor/agents/role-qa.md`, `.cursor/agents/role-tester.md`, `.cursor/agents/role-dev.md`, `.cursor/agents/role-spec.md`, and the example prompts in `docs/agent-workflow.md`.
+   Expected: role-qa shows checklist items 1 through 8, the words APPROVE and NEEDS CHANGES, and the done line `Next: you fix the spec, then new chat, @role-dev @specs/NNN-*.md`. It has no Mode B procedure and does not tell you to type "Mode A". role-tester's done line is `Next: you run the manual steps, then open a PR`. role-dev's done line is `Next: new chat, @role-tester @specs/NNN-*.md`. role-spec's done line is `Next: new chat, @role-qa @specs/NNN-*.md` and does not contain "Mode A". The workflow acceptance-check example starts with `@role-tester`, uses `specs/001-duplicate-rule.md`, says not to fix code, and mentions `/role-tester`. The QA example is `@role-qa` Review requirements for `specs/001-duplicate-rule.md`. Do not implement. and mentions `/role-qa`.
+
+2. In two new chats, send `@role-qa Mode B @specs/001-role-tester.md` in one and `/role-qa Mode B` with no spec path in the other.
+   Expected: the first reply is exactly `Acceptance checks are role-tester. Next: new chat, @role-tester @specs/001-role-tester.md`. The second reply is exactly `Acceptance checks are role-tester. Next: new chat, @role-tester @specs/NNN-*.md`. Neither chat edits a file, runs lint, typecheck, or tests, or writes **QA review**.
+
+3. In a new chat, send `@role-qa Write the Manual verification steps for @specs/001-role-tester.md` and do not type `Mode B`.
+   Expected: the reply is exactly `Acceptance checks are role-tester. Next: new chat, @role-tester @specs/001-role-tester.md`. That chat does not edit a file and does not run lint, typecheck, or tests.
+
+4. In a new chat, send `@role-tester Review requirements for @specs/001-role-tester.md` and do not ask for an acceptance check.
+   Expected: the reply is exactly `Requirements reviews are role-qa. Next: new chat, @role-qa @specs/001-role-tester.md`. That chat does not edit a file and does not run lint, typecheck, or tests.
 
 ## Definition of done
 
