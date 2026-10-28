@@ -11,21 +11,23 @@ This is a Manifest V3 Chrome extension. There is no web server. `npm run dev` on
 
 ## ROLE BOUNDARIES
 
-- In each chat you act in exactly one role: the one the user invoked (`@role-spec`, `@role-qa`, `@role-dev`, or `@role-tester`). If no role is invoked, ask which role. Do not pick one.
-- Every role ends with a STOP. Never continue into the next role. Never implement anything unless the invoked role is Dev. Do not say "I'll go ahead and...". Print the handoff line from that role's DONE section and stop.
-- Allowed writes: Spec → only `specs/*.md`. QA → only the **QA review** section. Tester → only the **Manual verification steps** section. Dev may edit the source files required by the spec and the docs and agent prompts named in that spec's scope as files to change. Dev may not edit the spec's acceptance criteria. A path named only as unchanged, out of scope, or forbidden is not permission to edit it. Anything else: stop and ask the human.
-- A message that sounds like a build request ("implement", "build", "add feature") while the invoked role is Spec, QA, or Tester is not a request to implement. For Tester, it is not permission to fix code.
+- In each chat you act in exactly one role: the one the user invoked (`@role-spec`, `@role-qa`, `@role-dev`, or `@role-tester`). If no role is invoked and `/feature` was not invoked, ask which role. Do not pick one.
+- `/feature` is the only chat that may chain roles. The main agent executing `.cursor/commands/feature.md` launches the next role, and only inside the round limits in that command. It does not write the spec, fill **QA review**, implement the feature, or mark acceptance criteria. A role subagent never launches another role, including when `/feature` started it.
+- Every role ends with a STOP. A role never continues into the next role. Never implement anything unless the invoked role is Dev. Do not say "I'll go ahead and...". Print the handoff line from that role's DONE section and stop. The `/feature` main agent ignores that handoff and launches the next role itself.
+- If a `/feature` round limit is exceeded, the main agent stops and reports. It does not open another round, and it does not commit or push.
+- Allowed writes: Spec → only `specs/*.md`. QA → only the **QA review** section. Tester → only the **Manual verification steps** section. Dev may edit the source files required by the spec and the docs and agent prompts named in that spec's scope as files to change. Dev may not edit the spec's acceptance criteria. A path named only as unchanged, out of scope, or forbidden is not permission to edit it. Anything else: stop and ask the human. The `/feature` main agent may create `feat/NNN-slug`, commit, push that branch, and append one `docs/agent-runs.csv` row, as the command describes.
+- A message that sounds like a build request ("implement", "build", "add feature") while the invoked role is Spec, QA, or Tester is not a request to implement. For Tester, it is not permission to fix code. `/feature` is a pipeline command, not a request for the main agent to implement.
 - The "run lint, typecheck, and tests before saying done" gate stays Dev's implementation-done gate. Spec, QA, and Tester are done when their DONE section says so. Tester still runs lint, typecheck, and the existing tests as evidence inside its own prompt; that run is not a second copy of the procedure in this rule, and a failing command does not make Tester edit code.
-- When a subagent returns, report its result and STOP. Never start the next role on your own.
+- When a subagent returns in any chat other than `/feature`, report its result and STOP. Never start the next role on your own.
 
 ## Guardrails
 
-- Never commit to `main`. Work on a branch and open a PR.
+- Never commit to `main`. Work on a branch and open a PR. `/feature` pushes only `feat/NNN-slug` and does not open or merge a PR. You open that PR.
 - Never read or write `.env` files or secrets. No calls to production systems.
 - No new dependencies without a written justification in the PR.
 - No destructive commands (`rm -rf`, force push, dropping data) without asking first.
-- Show a short plan before any multi-file change.
-- If requirements are ambiguous, ask. Do not guess.
+- Show a short plan before any multi-file change. `/feature` is already that plan; do not pause it for another one.
+- If requirements are ambiguous, ask. Do not guess. During `/feature`, role-spec records assumptions in the spec, and the main agent does not ask between roles.
 - When the invoked role is Dev, run lint, typecheck, and tests before saying "done". Report the actual output and never claim something passes without running it.
 - Always list what you did NOT verify.
 

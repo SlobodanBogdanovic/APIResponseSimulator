@@ -43,7 +43,9 @@ When the invoked role is Dev, run lint, typecheck, build, and test before
 saying the implementation is done. Paste the output. List what you did not
 verify. role-tester runs lint, typecheck, and the existing tests, reports the
 output, does not fix code, and stops at its handoff. Spec and QA stop at their
-handoff and do not run that suite. The agent never starts the next role.
+handoff and do not run that suite. Outside `/feature`, the agent never starts
+the next role. `/feature` chains roles only inside the round limits in
+`.cursor/commands/feature.md`.
 
 ---
 
@@ -82,8 +84,8 @@ its closure variables from that message. It never calls `chrome.storage`.
   `chrome.storage.local` from React components. Storage functions return Promises.
 - Do not use `window.confirm()`. Use inline confirmation.
 - One spec, one branch, one PR. Specs live in `specs/NNN-name.md`.
-- The workflow is a human-gated pipeline. The agent never advances it on its own. Finish the invoked role, print the handoff line, and stop. The human opens the next chat.
-- Flow: Spec → QA requirements review → (human) → Dev → role-tester acceptance check → (human: manual test) → PR → CI → merge. Details: `docs/agent-workflow.md`. Run log: `docs/agent-runs.csv`.
+- The workflow is a human-gated pipeline. Outside `/feature`, the agent never advances it on its own. Finish the invoked role, print the handoff line, and stop. The human opens the next chat. `/feature` is the only command that chains the roles, and only inside the round limits in `.cursor/commands/feature.md` and `docs/agent-workflow.md`.
+- Flow: Spec → QA requirements review → (human) → Dev → role-tester acceptance check → (human: manual test) → PR → CI → merge. `/feature` runs spec, QA, dev, and tester without those human pauses, pushes `feat/NNN-slug`, and stops before the PR. You open the PR, run the manual steps, and merge. Details: `docs/agent-workflow.md`. Run log: `docs/agent-runs.csv`.
 - QA validates requirements from the user's point of view. It does not write Playwright tests. `@role-qa` or `/role-qa` plus a spec path is that requirements review. role-tester does the acceptance check, does not write Playwright tests, and does not fix code. Existing `e2e/` tests and CI stay as they are.
 - Internal names stay: `MockRule`, storage keys `rules` and `settings`, bridge
   message source `__ninja_interceptor_bridge__`. Renaming them breaks installs
@@ -102,18 +104,18 @@ its closure variables from that message. It never calls `chrome.storage`.
 
 ## Guardrails
 
-- Never commit to `main`. Work on a branch and open a PR.
+- Never commit to `main`. Work on a branch and open a PR. `/feature` pushes only `feat/NNN-slug` and does not open or merge a PR. You open that PR.
 - Never read or write `.env` files or secrets. No calls to production systems.
 - No new dependencies without a written justification in the PR.
 - No destructive commands (`rm -rf`, force push, dropping data) without asking first.
-- Show a short plan before any multi-file change.
-- If requirements are ambiguous, ask. Do not guess.
+- Show a short plan before any multi-file change. `/feature` is already that plan; do not pause it for another one.
+- If requirements are ambiguous, ask. Do not guess. During `/feature`, role-spec records assumptions in the spec, and the main agent does not ask between roles.
 - When the invoked role is Dev, run lint, typecheck, build, and test before saying the implementation is done. Report the actual output and never claim something passes without running it. role-tester runs lint, typecheck, and the existing tests, reports the output, does not fix code, and stops at its handoff. Spec and QA stop at their handoff and do not run that suite.
 - Always list what you did NOT verify.
 
-Roles are Cursor subagents in `.cursor/agents/`: `@role-spec`, `@role-qa`, `@role-dev`, and `@role-tester`. Invoke one with that @ name, or from the `/` menu (`/role-spec`, `/role-qa`, `/role-dev`, `/role-tester`).
-In each chat, act in exactly one role. If no role is invoked, ask which role.
-`project-core` applies to every session, including ROLE BOUNDARIES. Each subagent prompt ends with DONE and a handoff line. When a subagent returns, report its result and STOP. Never start the next role on your own.
+Roles are Cursor subagents in `.cursor/agents/`: `@role-spec`, `@role-qa`, `@role-dev`, and `@role-tester`. Invoke one with that @ name, or from the `/` menu (`/role-spec`, `/role-qa`, `/role-dev`, `/role-tester`). `/feature` is the pipeline command in `.cursor/commands/feature.md`.
+In each chat, act in exactly one role, unless the user invoked `/feature`. If no role and no `/feature` is invoked, ask which role.
+`project-core` applies to every session, including ROLE BOUNDARIES. Each subagent prompt ends with DONE and a handoff line. A role subagent never launches another role. When a subagent returns outside `/feature`, report its result and STOP. Never start the next role on your own. During `/feature`, only the main agent may launch the next role, and only inside the round limits. Past a limit, it stops and reports.
 
 ---
 
