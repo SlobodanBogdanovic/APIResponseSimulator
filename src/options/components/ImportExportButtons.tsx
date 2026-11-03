@@ -187,6 +187,7 @@ export function ImportExportButtons({ rules, onImport }: ImportExportButtonsProp
     <div className="flex items-center gap-2">
       {status && (
         <span
+          data-testid="import-export-status"
           className={`text-xs font-medium ${
             status.kind === 'success' ? 'text-green-600' : 'text-red-600'
           }`}
@@ -196,6 +197,7 @@ export function ImportExportButtons({ rules, onImport }: ImportExportButtonsProp
         </span>
       )}
       <button
+        data-testid="export-rules"
         onClick={handleExport}
         disabled={!canExport}
         className="px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
@@ -204,6 +206,7 @@ export function ImportExportButtons({ rules, onImport }: ImportExportButtonsProp
         Export
       </button>
       <button
+        data-testid="import-rules"
         onClick={handleImportClick}
         className="px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
         title="Import rules from a JSON file"
@@ -211,6 +214,7 @@ export function ImportExportButtons({ rules, onImport }: ImportExportButtonsProp
         Import
       </button>
       <input
+        data-testid="import-file"
         ref={fileInputRef}
         type="file"
         accept="application/json,.json"

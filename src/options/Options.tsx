@@ -81,6 +81,7 @@ export function Options() {
             <div className="flex items-center gap-2">
               <ImportExportButtons rules={rules} onImport={handleImport} />
               <button
+                data-testid="add-rule"
                 onClick={handleAdd}
                 className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
               >

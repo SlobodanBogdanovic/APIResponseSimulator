@@ -46,6 +46,7 @@ export function Popup() {
       <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 bg-indigo-600">
         <span className="text-sm font-semibold text-white">API Response Simulator</span>
         <button
+          data-testid="global-toggle"
           onClick={handleGlobalToggle}
           className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${
             settings.extensionEnabled ? 'bg-indigo-300' : 'bg-gray-400'
@@ -66,7 +67,7 @@ export function Popup() {
           {activeCount} of {rules.length} rule{rules.length !== 1 ? 's' : ''} active
         </span>
         {!settings.extensionEnabled && (
-          <span className="ml-2 text-xs text-amber-600 font-medium">(extension disabled)</span>
+          <span data-testid="extension-disabled" className="ml-2 text-xs text-amber-600 font-medium">(extension disabled)</span>
         )}
       </div>
 
@@ -81,12 +82,13 @@ export function Popup() {
         ) : (
           <ul className="divide-y divide-gray-100">
             {rules.map((rule) => (
-              <li key={rule.id} className="flex items-center justify-between px-4 py-2">
+              <li key={rule.id} data-testid="popup-rule" data-rule-name={rule.name} className="flex items-center justify-between px-4 py-2">
                 <div className="flex-1 min-w-0 mr-3">
                   <p className="text-sm font-medium text-gray-800 truncate">{rule.name}</p>
                   <p className="text-xs text-gray-400 truncate">{rule.urlPattern}</p>
                 </div>
                 <button
+                  data-testid="popup-rule-toggle"
                   onClick={() => handleRuleToggle(rule.id, !rule.enabled)}
                   className={`relative inline-flex h-5 w-9 flex-shrink-0 items-center rounded-full transition-colors focus:outline-none ${
                     rule.enabled ? 'bg-indigo-500' : 'bg-gray-300'
@@ -107,6 +109,7 @@ export function Popup() {
       {/* Footer */}
       <div className="px-4 py-3 border-t border-gray-200">
         <button
+          data-testid="open-settings"
           onClick={handleOpenSettings}
           className="w-full text-sm text-center text-indigo-600 hover:text-indigo-800 font-medium transition-colors"
         >

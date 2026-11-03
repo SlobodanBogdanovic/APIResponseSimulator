@@ -32,6 +32,14 @@ As a …, I want …, so that ….
 
 - 
 
+## Coverage matrix
+
+Filled by role-tester. Leave this table empty in the spec draft.
+
+| Criterion | Test | Status |
+|---|---|---|
+| | | |
+
 ## Test notes
 
 Notes for later manual verification in the unpacked extension. Name the page (`options`, `popup`, or a fixture page) and the rule fields involved. Do not prescribe implementation.

@@ -25,3 +25,10 @@
 <!-- One row matching docs/agent-runs.csv: date,task,role,model,duration_min,cost_estimate_eur,ci_passed_first_try,human_corrections,notes -->
 
 -
+
+## Coverage matrix
+
+## Break-it proof
+
+## CI
+

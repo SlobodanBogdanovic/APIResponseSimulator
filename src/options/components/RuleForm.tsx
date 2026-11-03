@@ -63,6 +63,7 @@ export function RuleForm({ initialRule, onSave, onCancel }: RuleFormProps) {
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
           <input
+            data-testid="rule-name"
             type="text"
             required
             value={name}
@@ -76,6 +77,7 @@ export function RuleForm({ initialRule, onSave, onCancel }: RuleFormProps) {
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">URL pattern</label>
           <input
+            data-testid="rule-url-pattern"
             type="text"
             required
             value={urlPattern}
@@ -91,6 +93,7 @@ export function RuleForm({ initialRule, onSave, onCancel }: RuleFormProps) {
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Method</label>
             <select
+              data-testid="rule-method"
               value={method}
               onChange={(e) => setMethod(e.target.value as MockRule['method'])}
               className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
@@ -103,6 +106,7 @@ export function RuleForm({ initialRule, onSave, onCancel }: RuleFormProps) {
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Status code</label>
             <input
+              data-testid="rule-status-code"
               type="number"
               min={100}
               max={599}
@@ -117,6 +121,7 @@ export function RuleForm({ initialRule, onSave, onCancel }: RuleFormProps) {
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">Response body</label>
           <textarea
+            data-testid="rule-response-body"
             rows={8}
             value={responseBody}
             onChange={(e) => setResponseBody(e.target.value)}
@@ -130,6 +135,7 @@ export function RuleForm({ initialRule, onSave, onCancel }: RuleFormProps) {
           <div className="flex items-center justify-between mb-2">
             <label className="block text-sm font-medium text-gray-700">Response headers</label>
             <button
+              data-testid="add-header"
               type="button"
               onClick={addHeader}
               className="text-xs text-indigo-600 hover:text-indigo-800 font-medium transition-colors"
@@ -142,8 +148,9 @@ export function RuleForm({ initialRule, onSave, onCancel }: RuleFormProps) {
           ) : (
             <div className="space-y-2">
               {headers.map((row, idx) => (
-                <div key={idx} className="flex items-center gap-2">
+                <div key={idx} data-testid="header-row" className="flex items-center gap-2">
                   <input
+                    data-testid="header-key"
                     type="text"
                     value={row.key}
                     onChange={(e) => updateHeader(idx, 'key', e.target.value)}
@@ -151,6 +158,7 @@ export function RuleForm({ initialRule, onSave, onCancel }: RuleFormProps) {
                     className="flex-1 rounded-lg border border-gray-300 px-3 py-1.5 text-sm text-gray-900 placeholder-gray-400 font-mono focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                   />
                   <input
+                    data-testid="header-value"
                     type="text"
                     value={row.value}
                     onChange={(e) => updateHeader(idx, 'value', e.target.value)}
@@ -158,6 +166,7 @@ export function RuleForm({ initialRule, onSave, onCancel }: RuleFormProps) {
                     className="flex-1 rounded-lg border border-gray-300 px-3 py-1.5 text-sm text-gray-900 placeholder-gray-400 font-mono focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                   />
                   <button
+                    data-testid="remove-header"
                     type="button"
                     onClick={() => removeHeader(idx)}
                     className="text-gray-400 hover:text-red-500 transition-colors p-1"
@@ -175,6 +184,7 @@ export function RuleForm({ initialRule, onSave, onCancel }: RuleFormProps) {
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">Delay (ms)</label>
           <input
+            data-testid="rule-delay"
             type="number"
             min={0}
             value={delayMs}
@@ -186,6 +196,7 @@ export function RuleForm({ initialRule, onSave, onCancel }: RuleFormProps) {
         {/* Actions */}
         <div className="flex items-center justify-end gap-3 pt-2">
           <button
+            data-testid="cancel-rule"
             type="button"
             onClick={onCancel}
             className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
@@ -193,6 +204,7 @@ export function RuleForm({ initialRule, onSave, onCancel }: RuleFormProps) {
             Cancel
           </button>
           <button
+            data-testid="save-rule"
             type="submit"
             className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
           >
