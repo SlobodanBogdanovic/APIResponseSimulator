@@ -31,7 +31,8 @@ when files change. Load `dist/` as an unpacked extension.
 | `npm run build` | Three Vite builds, in this order. Order matters. |
 | `npm run lint` | ESLint |
 | `npm run typecheck` | `tsc --noEmit` for `src/`, then for `e2e/` |
-| `npm test` | Playwright. Run `npm run build` first. The smoke test loads unpacked `dist/`. |
+| `npm test` | Playwright after a build. `dist/` must already exist. |
+| `npm run test:e2e` | Builds `dist/`, then runs the headless Playwright suite. |
 
 `npm run build` is:
 
@@ -41,11 +42,16 @@ when files change. Load `dist/` as an unpacked extension.
 
 When the invoked role is Dev, run lint, typecheck, build, and test before
 saying the implementation is done. Paste the output. List what you did not
-verify. role-tester runs lint, typecheck, and the existing tests, reports the
-output, does not fix code, and stops at its handoff. Spec and QA stop at their
+verify. role-tester Phase 2 runs lint, typecheck, and the existing tests, reports the
+output, does not fix product code, and stops at its handoff. The procedure for
+Phase 1 and Phase 2 is in `.cursor/agents/role-tester.md`. Spec and QA stop at their
 handoff and do not run that suite. Outside `/feature`, the agent never starts
 the next role. `/feature` chains roles only inside the round limits in
-`.cursor/commands/feature.md`.
+`.cursor/commands/feature.md`: QA 2, Phase 1 2, Dev 3, Phase 2 fix rounds 2.
+
+CI workflow `CI` runs job `verify` (lint, typecheck, build) and job `e2e` in parallel.
+Job `e2e` runs `npm run test:e2e`. The job summary lists flaky tests. A failed `e2e`
+run uploads the HTML report, traces, and screenshots.
 
 ---
 
@@ -85,8 +91,8 @@ its closure variables from that message. It never calls `chrome.storage`.
 - Do not use `window.confirm()`. Use inline confirmation.
 - One spec, one branch, one PR. Specs live in `specs/NNN-name.md`.
 - The workflow is a human-gated pipeline. Outside `/feature`, the agent never advances it on its own. Finish the invoked role, print the handoff line, and stop. The human opens the next chat. `/feature` is the only command that chains the roles, and only inside the round limits in `.cursor/commands/feature.md` and `docs/agent-workflow.md`.
-- Flow: Spec → QA requirements review → (human) → Dev → role-tester acceptance check → (human: manual test) → PR → CI → merge. `/feature` runs spec, QA, dev, and tester without those human pauses, pushes `feat/NNN-slug`, and stops before the PR. You open the PR, run the manual steps, and merge. Details: `docs/agent-workflow.md`. Run log: `docs/agent-runs.csv`.
-- QA validates requirements from the user's point of view. It does not write Playwright tests. `@role-qa` or `/role-qa` plus a spec path is that requirements review. role-tester does the acceptance check, does not write Playwright tests, and does not fix code. Existing `e2e/` tests and CI stay as they are.
+- Flow: spec, QA requirements review, tester Phase 1, Dev, tester Phase 2, manual steps, PR, CI, merge. `specs/003-improve-playwright-tests-coverage.md` is the exception. Its Assumptions section has a line that, after trimming whitespace, is exactly Phase 1: skip. A code span does not count. `/feature` runs that order without the human pauses, pushes `feat/NNN-slug`, and stops before the PR. You open the PR, run the manual steps, and merge. Details: `docs/agent-workflow.md`. Run log: `docs/agent-runs.csv`.
+- QA validates requirements from the user's point of view. It does not write Playwright tests. `@role-qa` or `/role-qa` plus a spec path is that requirements review. Tester Phase 1 writes failing Playwright tests from the spec. Tester Phase 2 does the acceptance check and does not edit tests or product source. Example prompts: `@role-tester` Phase 1 for `specs/NNN-name.md`, and `@role-tester` Phase 2 acceptance check for `specs/NNN-name.md`.
 - Internal names stay: `MockRule`, storage keys `rules` and `settings`, bridge
   message source `__ninja_interceptor_bridge__`. Renaming them breaks installs
   or splits the bridge from the interceptor.
@@ -110,7 +116,7 @@ its closure variables from that message. It never calls `chrome.storage`.
 - No destructive commands (`rm -rf`, force push, dropping data) without asking first.
 - Show a short plan before any multi-file change. `/feature` is already that plan; do not pause it for another one.
 - If requirements are ambiguous, ask. Do not guess. During `/feature`, role-spec records assumptions in the spec, and the main agent does not ask between roles.
-- When the invoked role is Dev, run lint, typecheck, build, and test before saying the implementation is done. Report the actual output and never claim something passes without running it. role-tester runs lint, typecheck, and the existing tests, reports the output, does not fix code, and stops at its handoff. Spec and QA stop at their handoff and do not run that suite.
+- When the invoked role is Dev, run lint, typecheck, build, and test before saying the implementation is done. Report the actual output and never claim something passes without running it. role-tester Phase 2 runs lint, typecheck, and the existing tests, reports the output, does not fix product code, and stops at its handoff. Spec and QA stop at their handoff and do not run that suite.
 - Always list what you did NOT verify.
 
 Roles are Cursor subagents in `.cursor/agents/`: `@role-spec`, `@role-qa`, `@role-dev`, and `@role-tester`. Invoke one with that @ name, or from the `/` menu (`/role-spec`, `/role-qa`, `/role-dev`, `/role-tester`). `/feature` is the pipeline command in `.cursor/commands/feature.md`.

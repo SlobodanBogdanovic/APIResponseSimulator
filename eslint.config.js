@@ -22,6 +22,15 @@ export default tseslint.config(
     },
   },
   {
+    files: ['e2e/**/*.mjs'],
+    languageOptions: {
+      sourceType: 'module',
+      globals: {
+        URL: 'readonly',
+      },
+    },
+  },
+  {
     files: ['scripts/**/*.mjs'],
     languageOptions: {
       sourceType: 'module',

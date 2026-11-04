@@ -1,17 +1,17 @@
 # Agent workflow
 
-Human-gated. Spec, QA, Dev, and Tester are Cursor subagents in `.cursor/agents/`. Tester is the fourth subagent, invoked with `@role-tester` or `/role-tester`. Invoke one per chat with `@role-spec`, `@role-qa`, `@role-dev`, or `@role-tester`, or pick `/role-spec`, `/role-qa`, `/role-dev`, or `/role-tester` from the `/` menu. You approve the spec after QA requirements review, Dev implements, role-tester checks acceptance, then you run the manual verification steps. To run that same sequence in one chat and review only the final branch, use `/feature`. That is the only path that chains roles. Existing Playwright tests stay in the repo and run in CI. Nothing merges itself.
+Human-gated. Spec, QA, Dev, and Tester are Cursor subagents in `.cursor/agents/`. Tester is the fourth subagent, invoked with `@role-tester` or `/role-tester`. Invoke one per chat with `@role-spec`, `@role-qa`, `@role-dev`, or `@role-tester`, or pick `/role-spec`, `/role-qa`, `/role-dev`, or `/role-tester` from the `/` menu. You approve the spec after QA requirements review. Tester Phase 1 writes failing Playwright tests, Dev implements, tester Phase 2 checks acceptance, then you run the manual verification steps. To run that same sequence in one chat and review only the final branch, use `/feature`. That is the only path that chains roles. Nothing merges itself.
 
 ## Flow
 
 1. **Idea.** You describe the change in a sentence or two.
 2. **Spec.** New chat. Type `@role-spec`, or choose `/role-spec` from the `/` menu, then the idea. The agent writes `specs/NNN-name.md` from `specs/_template.md` and stops. You edit or accept the draft. No code in this chat.
 3. **QA requirements review.** New chat. Type `@role-qa`, or choose `/role-qa` from the `/` menu, and the spec path. The agent reviews the spec as a user advocate and writes findings into the spec's **QA review** section. Verdict: APPROVE or NEEDS CHANGES. You accept findings or send the spec back. No code, no new tests.
-4. **You.** Decide whether the spec is ready to implement.
-5. **Dev.** New chat. Type `@role-dev`, or choose `/role-dev` from the `/` menu, and the spec path. The agent implements the spec. It must not change the spec's acceptance criteria; if one looks wrong, it stops and tells you. After a later role-tester acceptance check, it addresses acceptance findings. One spec, one branch, one PR.
-6. **Tester acceptance check.** New chat. Type `@role-tester`, or choose `/role-tester` from the `/` menu, and the spec path. The agent checks each acceptance criterion against `git diff main`, runs lint, typecheck, and the existing tests, flags unspecified behavior, and writes **Manual verification steps** into the spec. It does not fix code.
+4. **Tester Phase 1.** New chat. Type `@role-tester` Phase 1 for `specs/NNN-name.md`. The tester writes failing Playwright tests from the spec and fills **Coverage matrix**. It does not implement. `specs/003-improve-playwright-tests-coverage.md` is the exception: its Assumptions section has a line that, after trimming whitespace, is exactly Phase 1: skip. A code span does not count. That file skips Phase 1.
+5. **Dev.** New chat. Type `@role-dev`, or choose `/role-dev` from the `/` menu, and the spec path. The agent implements the spec. It must not change the spec's acceptance criteria; if one looks wrong, it stops and tells you. After a later Phase 2 acceptance check, it addresses product bugs. One spec, one branch, one PR.
+6. **Tester Phase 2.** New chat. Type `@role-tester` Phase 2 acceptance check for `specs/NNN-name.md`. The agent checks each acceptance criterion against `git diff main`, runs lint, typecheck, and `npm test`, updates **Coverage matrix** status cells, and writes **Manual verification steps**. It does not edit tests or product source.
 7. **You: manual test.** Run the spec's Manual verification steps in the unpacked extension (under 5 minutes).
-8. **PR → CI → merge.** You open or review the PR. GitHub Actions runs install, lint, typecheck, build, and the existing Playwright suite. A failed run uploads the Playwright HTML report. You merge. After merge, append one row to `docs/agent-runs.csv`.
+8. **PR → CI → merge.** You open or review the PR. Workflow `CI` runs job `verify` and job `e2e` in parallel. Job `e2e` runs `npm run test:e2e`. The job summary lists flaky tests. A failed run uploads the HTML report, traces, and screenshots. You merge. After merge, append one row to `docs/agent-runs.csv`.
 
 `@project-core` is always on. The roles are subagents. They run when you invoke `@role-spec`, `@role-qa`, `@role-dev`, or `@role-tester`, or pick `/role-spec`, `/role-qa`, `/role-dev`, or `/role-tester` from the `/` menu. Outside `/feature`, when a subagent returns, the parent reports the result and stops.
 
@@ -24,7 +24,8 @@ Human-gated. Spec, QA, Dev, and Tester are Cursor subagents in `.cursor/agents/`
 | `npm run build` | Production build into `dist/` (pages, then interceptor, then bridge) |
 | `npm run lint` | ESLint |
 | `npm run typecheck` | `tsc --noEmit` for `src/` and for `e2e/` |
-| `npm test` | Playwright. Requires `npm run build` first |
+| `npm test` | Playwright after a build. `dist/` must already exist. |
+| `npm run test:e2e` | Builds `dist/`, then runs the headless Playwright suite. |
 
 ## Example prompts
 
@@ -34,13 +35,15 @@ Human-gated. Spec, QA, Dev, and Tester are Cursor subagents in `.cursor/agents/`
 
 **Dev:** `@role-dev` Implement `specs/001-duplicate-rule.md`. Do not change the spec's acceptance criteria. Or `/role-dev` with the same sentence.
 
-`@role-tester` Acceptance check for `specs/001-duplicate-rule.md` against `git diff main`. Do not fix code. Or `/role-tester` with the same sentence.
+**Tester Phase 1:** `@role-tester` Phase 1 for `specs/001-duplicate-rule.md`. Write failing Playwright tests from the spec before implementation.
+
+**Tester Phase 2:** `@role-tester` Phase 2 acceptance check for `specs/001-duplicate-rule.md` against `git diff main`. Do not edit tests or product source.
 
 **Pipeline:** `/feature Add a duplicate button on each rule card. The new rule starts disabled.`
 
 ## /feature
 
-One chat, from the idea to a pushed branch. Type `/feature` and the feature idea. The main agent follows `.cursor/commands/feature.md`. It launches the four role subagents and waits for each to finish. It does not write the spec, fill **QA review**, implement, or mark acceptance itself. You review once, at the end.
+One chat, from the idea to a pushed branch. Type `/feature` and the feature idea. The main agent follows `.cursor/commands/feature.md`. It launches spec, QA, tester Phase 1, Dev, and tester Phase 2, and waits for each to finish. It does not write the spec, fill **QA review**, implement, or mark acceptance itself. You review once, at the end.
 
 ```
 /feature Add a duplicate button on each rule card. The new rule starts disabled.
@@ -52,9 +55,10 @@ It creates `feat/NNN-slug` from local `main` before any role runs. A dirty tree,
 
 Limits, then it stops and reports instead of continuing:
 
-- QA requirements review: 2 rounds. A round is one `role-qa` review. **NEEDS CHANGES** sends High and Medium findings back to `role-spec`, then QA reviews again. An open High finding after round 2 stops the run before implementation. Medium and Low that remain are reported and do not block.
-- Dev: 3 attempts to get `npm run lint`, `npm run typecheck`, and `npm test` green. `npm test` needs `npm run build` first. A failed build is a failed attempt. Missing command output is not a pass.
-- Tester: 2 fix rounds. **NOT MET** goes back to `role-dev`, then tester runs again. **CANNOT VERIFY** does not start a fix.
+- QA requirements review: 2 rounds. A round is one `role-qa` review. **NEEDS CHANGES** sends High and Medium findings back to `role-spec`, then QA reviews again. An open High finding after round 2 stops the run before Phase 1. Medium and Low that remain are reported and do not block.
+- Tester Phase 1: 2 launches. The second launch is only a setup-failure repair. If the new tests pass, or the second launch is still setup, the run stops before Dev.
+- Dev: 3 attempts to get `npm run lint`, `npm run typecheck`, `npm run build`, and `npm test` green. `npm test` needs `npm run build` first. A failed build is a failed attempt. Missing command output is not a pass.
+- Tester Phase 2: 2 fix rounds. **NOT MET** goes back to `role-dev`, then Phase 2 runs again. **CANNOT VERIFY** does not start a fix round. Dev does not edit the tests in a fix round.
 
 When tester reports no **NOT MET**, the agent commits the spec and the implementation separately, pushes `feat/NNN-slug`, prints a PR description you can paste, appends a `pipeline` row to `docs/agent-runs.csv` with cost left blank, commits and pushes that row, and stops with "Ready for your review."
 

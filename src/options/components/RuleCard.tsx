@@ -30,7 +30,7 @@ export function RuleCard({ rule, onEdit, onDelete, onToggle }: RuleCardProps) {
   const methodColor = METHOD_COLORS[rule.method] ?? 'bg-gray-100 text-gray-700'
 
   return (
-    <div className={`bg-white rounded-xl border shadow-sm p-4 transition-opacity ${rule.enabled ? 'border-gray-200 opacity-100' : 'border-gray-100 opacity-60'}`}>
+    <div data-testid="rule-card" data-rule-name={rule.name} className={`bg-white rounded-xl border shadow-sm p-4 transition-opacity ${rule.enabled ? 'border-gray-200 opacity-100' : 'border-gray-100 opacity-60'}`}>
       <div className="flex items-start justify-between gap-3">
         {/* Left: info */}
         <div className="flex-1 min-w-0">
@@ -48,6 +48,7 @@ export function RuleCard({ rule, onEdit, onDelete, onToggle }: RuleCardProps) {
 
         {/* Right: toggle */}
         <button
+          data-testid="rule-enabled-toggle"
           onClick={() => onToggle(rule.id, !rule.enabled)}
           className={`flex-shrink-0 relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${
             rule.enabled ? 'bg-indigo-500' : 'bg-gray-300'
@@ -66,6 +67,7 @@ export function RuleCard({ rule, onEdit, onDelete, onToggle }: RuleCardProps) {
       <div className="flex items-center justify-between mt-3 pt-3 border-t border-gray-100">
         <div className="flex items-center gap-3">
           <button
+            data-testid="rule-edit"
             onClick={() => onEdit(rule)}
             className="text-xs text-indigo-600 hover:text-indigo-800 font-medium transition-colors"
           >
@@ -73,6 +75,7 @@ export function RuleCard({ rule, onEdit, onDelete, onToggle }: RuleCardProps) {
           </button>
           {!confirming ? (
             <button
+              data-testid="rule-delete"
               onClick={handleDeleteClick}
               className="text-xs text-red-500 hover:text-red-700 font-medium transition-colors"
             >
@@ -82,12 +85,14 @@ export function RuleCard({ rule, onEdit, onDelete, onToggle }: RuleCardProps) {
             <span className="flex items-center gap-2">
               <span className="text-xs text-gray-600">Are you sure?</span>
               <button
+                data-testid="rule-delete-confirm"
                 onClick={handleConfirm}
                 className="text-xs text-red-600 hover:text-red-800 font-semibold transition-colors"
               >
                 Confirm
               </button>
               <button
+                data-testid="rule-delete-cancel"
                 onClick={handleCancelDelete}
                 className="text-xs text-gray-500 hover:text-gray-700 transition-colors"
               >

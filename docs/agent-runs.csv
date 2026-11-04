@@ -1,2 +1,3 @@
 date,task,role,model,duration_min,cost_estimate_eur,ci_passed_first_try,human_corrections,qa_findings_accepted,notes
 2026-10-28,toolbar-on-off-status,pipeline,,,,,,,QA verdict APPROVE. QA rounds 2. Dev attempts 1. Tester fix rounds 0. Four Low findings remain.
+2026-11-03,improve-playwright-tests-coverage,pipeline,grok-4.7,,,,,"APPROVE, QA rounds 2, Dev attempts 1, tester fix rounds 1, Low finding 10 still open"

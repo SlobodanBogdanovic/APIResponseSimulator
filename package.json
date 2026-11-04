@@ -9,7 +9,9 @@
     "build:watch": "concurrently \"vite build --watch\" \"vite build --watch --config vite.content.config.ts\" \"vite build --watch --config vite.bridge.config.ts\"",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit && tsc --noEmit -p tsconfig.e2e.json",
-    "test": "playwright test"
+    "test": "playwright test",
+    "test:e2e": "npm run build && playwright test",
+    "test:e2e:reverse": "npm run build && playwright test e2e/smoke.spec.ts e2e/rules.spec.ts e2e/persistence.spec.ts e2e/intercept.spec.ts e2e/import-export.spec.ts e2e/edge.spec.ts"
   },
   "keywords": [],
   "author": "",

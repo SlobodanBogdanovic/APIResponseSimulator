@@ -43,25 +43,35 @@ Launch prompt, every round:
 > You are invoked with `@role-qa`. Requirements review only of `specs/NNN-slug.md`. Write the **QA review** section. Rank findings High, Med, or Low, each with a suggested rewrite. On a repeat review, mark every earlier finding `resolved` or `still open`. Set the verdict to **APPROVE** or **NEEDS CHANGES**. State the biggest risk. Do not run an acceptance check. Do not mark criteria MET, NOT MET, or CANNOT VERIFY. Do not write **Manual verification steps**. Do not implement. Do not edit acceptance criteria. Do not commit, push, or open a PR.
 
 - Round 1 is the review of the new spec.
-- **APPROVE** on round 1: go to Dev. Do not revise.
+- **APPROVE** on round 1: go to Tester Phase 1. Do not revise.
 - **NEEDS CHANGES** on round 1: launch `role-spec` to revise that same file, then run QA round 2. Revision prompt:
 
 > You are invoked with `@role-spec`. Revise only `specs/NNN-slug.md` to address these High and Medium findings: `<findings>`. You may edit acceptance criteria only to address those findings. Leave Low findings in place unless a High or Medium rewrite requires a wording change. Do not ask questions. Do not implement. Do not commit, push, or open a PR. Touch no other file.
 
 - Round 2 is the last QA review. Do not launch a third.
-- After round 2, read the findings. A High finding is still open unless that finding's rank line is marked `resolved` (the status next to the rank, such as `[High] resolved`). The word `resolved` inside a suggested rewrite does not close it. A High entry with no status, or marked `still open`, is open. If any High finding is still open, stop before Dev. Do not implement.
+- After round 2, read the findings. A High finding is still open unless that finding's rank line is marked `resolved` (the status next to the rank, such as `[High] resolved`). The word `resolved` inside a suggested rewrite does not close it. A High entry with no status, or marked `still open`, is open. If any High finding is still open, stop before Tester Phase 1. Do not start Phase 1 or Dev. Do not implement.
 - Medium and Low findings that remain do not block Dev. Carry them into the PR description.
 - If a QA launch changes the **Acceptance criteria** section, stop. Only a `role-spec` launch may change that section. Do not restore it yourself.
 
 QA rounds used is 1 or 2.
 
-## 3. Dev — maximum 3 attempts
+## 3. Tester Phase 1 — maximum 2 launches
 
-Attempt 1 is the first implementation. Attempts 2 and 3 are re-launches with the failure output. These three attempts are only for getting the checks green before the first tester run. Tester fix rounds do not consume them.
+Read `specs/NNN-slug.md`. Phase 1 launches only when the spec file has no line that, after trimming whitespace, is exactly Phase 1: skip. A code span does not count. Ignore a line inside a fenced code block, and ignore a trimmed line that contains a backtick. If that exact line is present, skip Phase 1 and go to Dev. Dev may create the spec files that spec names.
+
+Launch prompt:
+
+> You are invoked with `@role-tester`. Phase 1 for `specs/NNN-slug.md`. From the spec only, write Playwright tests for every acceptance criterion that can be automated. Titles carry the criterion id. Fill the **Coverage matrix**. Run `npm run test:e2e` and paste the output. Show that the new tests fail because the behavior is absent. Do not edit product source, the harness, CI, or acceptance criteria. Do not weaken, skip, or delete a test. If a test looks wrong, stop and ask the human. Do not commit, push, or open a PR.
+
+Phase 1 attempts: at most 2 launches. The second launch happens only when the first result is a setup failure and the tester is repairing tests. If the tests fail for the right reason, Phase 1 is finished in one launch. If they pass, or the second launch is still setup, or the tester asks the human, stop the pipeline. Do not start Dev. Do not commit or push.
+
+## 4. Dev — maximum 3 attempts
+
+Attempt 1 is the first implementation. Attempts 2 and 3 are re-launches with the failure output. These three attempts are only for getting the checks green before the first Phase 2 run. Phase 2 fix rounds do not consume them.
 
 Launch `role-dev`. First-attempt prompt:
 
-> You are invoked with `@role-dev`. Implement `specs/NNN-slug.md`. Do not stop to ask the human to approve a plan. Do not edit the acceptance criteria. If one looks wrong, stop and tell the human. Do not add a dependency the spec does not require. Do not commit, push, or open a PR. Before done, run `npm run lint`, `npm run typecheck`, `npm run build`, and `npm test`. Paste each command's output and exit status. List what you did not verify.
+> You are invoked with `@role-dev`. Implement `specs/NNN-slug.md`. Do not stop to ask the human to approve a plan. Do not edit the acceptance criteria. If one looks wrong, stop and tell the human. Do not add a dependency the spec does not require. Do not edit `e2e/**/*.spec.ts` unless the spec lists them as Dev-owned. If a test looks wrong, stop and tell the human. Do not commit, push, or open a PR. Before done, run `npm run lint`, `npm run typecheck`, `npm run build`, and `npm test`. Paste each command's output and exit status. `npm test` needs the build that just ran. For this spec, also run `npm run test:e2e:reverse` and the break-it proof, and paste both. List what you did not verify.
 
 A re-launch prompt adds: this is attempt N of 3, here is the failing output, fix the implementation, then run the same four commands again and paste the output.
 
@@ -73,31 +83,31 @@ After each Dev launch, if `package.json` or `package-lock.json` changed and the 
 
 If attempt 3 is not green, stop and report the last output.
 
-## 4. Tester — maximum 2 fix rounds
+## 5. Tester Phase 2 — maximum 2 fix rounds
 
 Launch `role-tester`. Prompt:
 
-> You are invoked with `@role-tester`. Acceptance check for `specs/NNN-slug.md` against `git diff main`. For each acceptance criterion report MET, NOT MET, or CANNOT VERIFY with evidence. Run `npm run lint`, `npm run typecheck`, and `npm test`, and paste the output. Do not add a build requirement of your own. Flag behavior in the diff that the spec does not mention. Write **Manual verification steps** only. Do not fix code. Do not edit acceptance criteria. Do not commit, push, or open a PR.
+> You are invoked with `@role-tester`. Phase 2 acceptance check for `specs/NNN-slug.md` against `git diff main`. For each acceptance criterion report MET, NOT MET, or CANNOT VERIFY with evidence. Run `npm run lint`, `npm run typecheck`, and `npm test`, and paste the output. Update **Coverage matrix** status cells. Leave a row `pending` when the spec says that row stays `pending`. Write **Manual verification steps**. Do not edit tests, product source, or acceptance criteria. Do not commit, push, or open a PR.
 
-`CANNOT VERIFY` does not start a fix. Unspecified behavior does not start a fix. Record both for the PR description.
+`CANNOT VERIFY` does not start a fix round. Unspecified behavior does not start a fix round. Record both for the PR description.
 
 If the latest tester report contains any NOT MET, and fewer than 2 fix rounds have been used, start a fix round.
 
-A fix round is one `role-dev` launch with the NOT MET findings, then, only if that launch is green by the same output rule as section 3, one `role-tester` launch. Fix-round Dev prompt:
+A fix round is one `role-dev` launch with the NOT MET findings, then, only if that launch is green by the same output rule as section 4, one Phase 2 launch. Dev does not edit the tests. If Dev says a test is wrong, stop the pipeline and report. Fix-round Dev prompt:
 
-> You are invoked with `@role-dev`. Address these acceptance findings for `specs/NNN-slug.md`: `<findings>`. Do not stop to ask the human to approve a plan. Do not edit acceptance criteria. Do not add a dependency the spec does not require. Do not commit, push, or open a PR. Run `npm run lint`, `npm run typecheck`, `npm run build`, and `npm test`. Paste each command's output and exit status. List what you did not verify.
+> You are invoked with `@role-dev`. Address these acceptance findings for `specs/NNN-slug.md`: `<findings>`. Do not stop to ask the human to approve a plan. Do not edit acceptance criteria. Do not edit tests. If a test looks wrong, stop and tell the human. Do not add a dependency the spec does not require. Do not commit, push, or open a PR. Run `npm run lint`, `npm run typecheck`, `npm run build`, and `npm test`. Paste each command's output and exit status. List what you did not verify.
 
-If that Dev launch is not green, do not launch tester. The fix round is used. If a fix round remains, launch `role-dev` again with the failing output and the same findings. If that later launch is green, run tester. If none remain, stop.
+If that Dev launch is not green, do not launch tester. The fix round is used. If a fix round remains, launch `role-dev` again with the failing output and the same findings. If that later launch is green, run Phase 2. If none remain, stop.
 
-If tester still reports any NOT MET after 2 fix rounds, stop and report. Do not start a third fix round.
+If tester still reports any NOT MET after 2 fix rounds, stop and report. Do not start a third fix round. Do not commit or push.
 
 Fix rounds used is the number of these Dev fix launches, from 0 to 2.
 
-Apply the section 3 dependency and acceptance-criteria checks after every Dev launch in this section. If tester changes the **Acceptance criteria** section, stop. Do not restore it yourself.
+Apply the section 4 dependency and acceptance-criteria checks after every Dev launch in this section. If tester changes the **Acceptance criteria** section, stop. Do not restore it yourself.
 
 If tester fails to return a per-criterion report, stop. Do not mark criteria MET yourself.
 
-## 5. Commits and push
+## 6. Commits and push
 
 Run this section only when the latest tester report has no NOT MET.
 
@@ -129,7 +139,7 @@ git push -u origin HEAD:feat/NNN-slug
 
 Never push `main`. Never force-push. Never merge. Never open a PR. Do not run `gh pr create`. If this push fails, stop and report the error. Do not append the run-log row, and do not print the ready line.
 
-## 6. PR description
+## 7. PR description
 
 Print a ready-to-paste PR description with these sections:
 
@@ -139,9 +149,12 @@ Print a ready-to-paste PR description with these sections:
 - **Manual verification steps** — the numbered steps now in the spec
 - **Not verified** — everything Dev or Tester listed, plus that you did not re-run the suite and did not run the manual steps
 - **Deviations from the spec** — unspecified behavior the tester flagged, and assumptions the spec records. If there are none, write "None." Then say whether the spec required a new dependency. If it did, include the justification. If it did not, write that no dependency was added.
-- **Loop rounds** — QA rounds, Dev attempts, tester fix rounds
+- **Loop rounds** — QA rounds, Phase 1 launches, Dev attempts, Phase 2 fix rounds
+- **Coverage matrix** — the table from the spec
+- **Break-it proof** — the failing output and the restored green output when the spec asked for them; otherwise `None.`
+- **CI** — `Add the e2e job link after the first green run.`
 
-## 7. Run log
+## 8. Run log
 
 Append one row to `docs/agent-runs.csv`. Columns, in order:
 
@@ -165,7 +178,7 @@ git push origin HEAD:feat/NNN-slug
 
 If the commit or the push fails, report the failure. Do not print the ready line.
 
-## 8. Stop
+## 9. Stop
 
 When the log commit is on the remote feature branch, end with this line and nothing after it:
 

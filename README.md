@@ -353,6 +353,9 @@ npm run lint
 npm run typecheck
 npm run build
 npm test
+
+# Build and run the suite headless
+npm run test:e2e
 ```
 
 After any code change: run `npm run build`, then click the **refresh icon** on the extension card in `chrome://extensions`, and reload your app tab.
