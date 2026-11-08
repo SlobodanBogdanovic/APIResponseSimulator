@@ -71,7 +71,7 @@ Attempt 1 is the first implementation. Attempts 2 and 3 are re-launches with the
 
 Launch `role-dev`. First-attempt prompt:
 
-> You are invoked with `@role-dev`. Implement `specs/NNN-slug.md`. Do not stop to ask the human to approve a plan. Do not edit the acceptance criteria. If one looks wrong, stop and tell the human. Do not add a dependency the spec does not require. Do not edit `e2e/**/*.spec.ts` unless the spec lists them as Dev-owned. If a test looks wrong, stop and tell the human. Do not commit, push, or open a PR. Before done, run `npm run lint`, `npm run typecheck`, `npm run build`, and `npm test`. Paste each command's output and exit status. `npm test` needs the build that just ran. For this spec, also run `npm run test:e2e:reverse` and the break-it proof, and paste both. List what you did not verify.
+> You are invoked with `@role-dev`. Implement `specs/NNN-slug.md`. Do not stop to ask the human to approve a plan. Do not edit the acceptance criteria. If one looks wrong, stop and tell the human. Do not add a dependency the spec does not require. Do not edit `e2e/**/*.spec.ts` unless the spec lists them as Dev-owned. If a test looks wrong, stop and tell the human. Do not commit, push, or open a PR. Before done, run `npm run lint`, `npm run typecheck`, `npm run build`, and `npm test`. Paste each command's output and exit status. `npm test` needs the build that just ran. List what you did not verify.
 
 A re-launch prompt adds: this is attempt N of 3, here is the failing output, fix the implementation, then run the same four commands again and paste the output.
 

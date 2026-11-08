@@ -40,22 +40,13 @@ when files change. Load `dist/` as an unpacked extension.
 2. `vite build --config vite.content.config.ts` — interceptor IIFE. `emptyOutDir: false`.
 3. `vite build --config vite.bridge.config.ts` — bridge IIFE. `emptyOutDir: false`.
 
-When the invoked role is Dev, run lint, typecheck, build, and test before
-saying the implementation is done. Paste the output. List what you did not
-verify. role-tester Phase 2 runs lint, typecheck, and the existing tests, reports the
-output, does not fix product code, and stops at its handoff. The procedure for
-Phase 1 and Phase 2 is in `.cursor/agents/role-tester.md`. Spec and QA stop at their
-handoff and do not run that suite. Outside `/feature`, the agent never starts
-the next role. `/feature` chains roles only inside the round limits in
-`.cursor/commands/feature.md`: QA 2, Phase 1 2, Dev 3, Phase 2 fix rounds 2.
+The Dev done gate is in `.cursor/agents/role-dev.md`. Pipeline order and round limits are in `.cursor/commands/feature.md` and `docs/agent-workflow.md`. CI is in `docs/testing.md`.
 
-CI workflow `CI` runs job `verify` (lint, typecheck, build) and job `e2e` in parallel.
-Job `e2e` runs `npm run test:e2e`. The job summary lists flaky tests. A failed `e2e`
-run uploads the HTML report, traces, and screenshots.
+Refresh the extension on `chrome://extensions`, and reload the app tab. The extension does not hot-reload.
 
 ---
 
-## Architecture overview
+## Architecture
 
 ```
 src/
@@ -79,6 +70,8 @@ e2e/                       — Playwright. Loads dist/ unpacked.
 `rules` and `settings` with `window.postMessage`. The interceptor only updates
 its closure variables from that message. It never calls `chrome.storage`.
 
+The longer map is in `docs/architecture.md`.
+
 ---
 
 ## Conventions
@@ -88,14 +81,11 @@ its closure variables from that message. It never calls `chrome.storage`.
   when source or the manifest changes, and commit the result.
 - All storage operations go through `src/shared/storage.ts`. Do not call
   `chrome.storage.local` from React components. Storage functions return Promises.
-- Do not use `window.confirm()`. Use inline confirmation.
 - One spec, one branch, one PR. Specs live in `specs/NNN-name.md`.
-- The workflow is a human-gated pipeline. Outside `/feature`, the agent never advances it on its own. Finish the invoked role, print the handoff line, and stop. The human opens the next chat. `/feature` is the only command that chains the roles, and only inside the round limits in `.cursor/commands/feature.md` and `docs/agent-workflow.md`.
-- Flow: spec, QA requirements review, tester Phase 1, Dev, tester Phase 2, manual steps, PR, CI, merge. `specs/003-improve-playwright-tests-coverage.md` is the exception. Its Assumptions section has a line that, after trimming whitespace, is exactly Phase 1: skip. A code span does not count. `/feature` runs that order without the human pauses, pushes `feat/NNN-slug`, and stops before the PR. You open the PR, run the manual steps, and merge. Details: `docs/agent-workflow.md`. Run log: `docs/agent-runs.csv`.
-- QA validates requirements from the user's point of view. It does not write Playwright tests. `@role-qa` or `/role-qa` plus a spec path is that requirements review. Tester Phase 1 writes failing Playwright tests from the spec. Tester Phase 2 does the acceptance check and does not edit tests or product source. Example prompts: `@role-tester` Phase 1 for `specs/NNN-name.md`, and `@role-tester` Phase 2 acceptance check for `specs/NNN-name.md`.
 - Internal names stay: `MockRule`, storage keys `rules` and `settings`, bridge
   message source `__ninja_interceptor_bridge__`. Renaming them breaks installs
   or splits the bridge from the interceptor.
+- Pipeline stage order and round limits: `.cursor/commands/feature.md` and `docs/agent-workflow.md`.
 
 ### Adding a new field to MockRule
 
@@ -116,31 +106,30 @@ its closure variables from that message. It never calls `chrome.storage`.
 - No destructive commands (`rm -rf`, force push, dropping data) without asking first.
 - Show a short plan before any multi-file change. `/feature` is already that plan; do not pause it for another one.
 - If requirements are ambiguous, ask. Do not guess. During `/feature`, role-spec records assumptions in the spec, and the main agent does not ask between roles.
-- When the invoked role is Dev, run lint, typecheck, build, and test before saying the implementation is done. Report the actual output and never claim something passes without running it. role-tester Phase 2 runs lint, typecheck, and the existing tests, reports the output, does not fix product code, and stops at its handoff. Spec and QA stop at their handoff and do not run that suite.
+- When the invoked role is Dev, run the done gate in `.cursor/agents/role-dev.md` before saying the implementation is done. Report the actual output and never claim something passes without running it.
 - Always list what you did NOT verify.
-
-Roles are Cursor subagents in `.cursor/agents/`: `@role-spec`, `@role-qa`, `@role-dev`, and `@role-tester`. Invoke one with that @ name, or from the `/` menu (`/role-spec`, `/role-qa`, `/role-dev`, `/role-tester`). `/feature` is the pipeline command in `.cursor/commands/feature.md`.
-In each chat, act in exactly one role, unless the user invoked `/feature`. If no role and no `/feature` is invoked, ask which role.
-`project-core` applies to every session, including ROLE BOUNDARIES. Each subagent prompt ends with DONE and a handoff line. A role subagent never launches another role. When a subagent returns outside `/feature`, report its result and STOP. Never start the next role on your own. During `/feature`, only the main agent may launch the next role, and only inside the round limits. Past a limit, it stops and reports.
 
 ---
 
-## Hard rules — never violate these
+## Hard rules
 
 ### Content script
 
 - `src/content/interceptor.ts` must have **zero import statements**.
   The IIFE build has no module resolution. Any import will break the build.
   All types and logic must be inlined in the single file.
+  Do not add imports to `src/content/interceptor.ts`.
 
 - `window.fetch` and `XMLHttpRequest.prototype` must be patched **synchronously**
   at the top level of the file — before any `await`, callback, or message
   listener. The script runs at `document_start` and requests can fire before
   the bridge delivers rules.
+  Do not move patch code inside a function that is called asynchronously.
 
 - The `message` listener must only **update the `rules` and `settings`
   variables**. It must never re-run the patch code. Patching twice wraps
   `window.fetch` inside itself and breaks all requests.
+  Do not call `applyPatches` or re-wrap `window.fetch` more than once.
 
 - The patches capture `rules` and `settings` as closure variables.
   Bridge messages update those variables in place — the patch functions
@@ -160,6 +149,7 @@ In each chat, act in exactly one role, unless the user invoked `/feature`. If no
   Without it the content script runs in an isolated context and cannot
   patch the page's `window.fetch` or `XMLHttpRequest`. Remove it and
   nothing works. Requires Chrome 111+.
+  Do not remove `"world": "MAIN"` from the interceptor content script.
 
 - `content/bridge.js` must stay `"world": "ISOLATED"`.
 
@@ -171,14 +161,17 @@ In each chat, act in exactly one role, unless the user invoked `/feature`. If no
 - `emptyOutDir: false` must remain in `vite.content.config.ts` and
   `vite.bridge.config.ts`. Either of those builds wiping `dist/` deletes
   the other build's output.
+  Do not set `emptyOutDir: true` in the content or bridge Vite configs.
 
 - Both content configs must use `rollupOptions` directly — not `lib` mode.
   The `lib` mode + `entryFileNames` combination produces unpredictable output
   filenames across Vite versions. Outputs must stay exactly
   `dist/content/interceptor.js` and `dist/content/bridge.js`.
+  Do not use `lib` mode in `vite.content.config.ts` or `vite.bridge.config.ts`.
 
 - `jimp` is pinned to `@0.22`. Do not upgrade it. jimp v1 has a completely
   different API and `scripts/gen-icons.mjs` will break silently.
+  Do not upgrade `jimp` past `0.22`.
 
 ### URL matching
 
@@ -197,6 +190,12 @@ In each chat, act in exactly one role, unless the user invoked `/feature`. If no
 - XHR fake responses must fire events in this exact order:
   `readystatechange` → `load` → `loadend`
   Wrong order breaks frameworks that check `readyState` in load handlers.
+
+### UI and repo
+
+- Do not use `window.confirm()` anywhere in the UI. Use inline confirmation.
+- Do not commit to `main`, read `.env` files, or add dependencies without a PR justification.
+- No destructive command without asking first.
 
 ---
 
@@ -227,33 +226,11 @@ If the user reports the extension not working, ask for their Chrome version firs
 
 ---
 
-## What not to do
+## Skills
 
-- Do not add imports to `src/content/interceptor.ts`
-- Do not move patch code inside a function that is called asynchronously
-- Do not call `applyPatches` or re-wrap `window.fetch` more than once
-- Do not use `window.confirm()` anywhere in the UI — use inline confirmation
-- Do not use `lib` mode in `vite.content.config.ts` or `vite.bridge.config.ts`
-- Do not upgrade `jimp` past `0.22`
-- Do not add `declarativeNetRequest` to the manifest
-- Do not remove `"world": "MAIN"` from the interceptor content script
-- Do not set `emptyOutDir: true` in the content or bridge Vite configs
-- Do not commit to `main`, read `.env` files, or add dependencies without a PR justification
+Project and third-party skills live in `.cursor/skills/`. The register is `docs/ai-skills.md`.
 
----
-
-## After any code change
-
-```bash
-npm run lint
-npm run typecheck
-npm run build
-npm test
-```
-
-Then in Chrome: `chrome://extensions` → click the refresh icon on the extension card, and reload the app tab.
-
-The extension does not hot-reload. A full rebuild and manual refresh is always required.
+Third-party skills do not override this file or `.cursor/rules/project-core.mdc`.
 
 ---
 

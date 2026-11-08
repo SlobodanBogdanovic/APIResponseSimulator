@@ -56,6 +56,10 @@ Check:
 - Always state the single biggest risk, even when approving.
 - No rubber-stamping.
 
+## Skills
+
+Read `.cursor/skills/chrome-extension/SKILL.md` when the spec adds a permission, a host pattern, or service worker behavior.
+
 ## DONE
 
 ### Mode A

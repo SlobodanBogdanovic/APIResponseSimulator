@@ -41,6 +41,10 @@ If the tester believes a test is wrong, Phase 1 stops and asks the human. It doe
 - Phase 2 does not edit tests, product source, the harness, CI, or acceptance criteria. A failing test is a finding for Dev.
 - Do not fix code.
 
+## Skills
+
+Read `.cursor/skills/playwright-best-practices/SKILL.md` and `.cursor/skills/extension-e2e-testing/SKILL.md` before writing or judging Playwright tests.
+
 ## DONE
 
 Phase 1 is done when `npm run test:e2e` was run and the new tests failed on an assertion about the missing behavior. STOP. Print: "Next: new chat, @role-dev @specs/NNN-*.md".

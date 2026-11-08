@@ -11,21 +11,13 @@ Human-gated. Spec, QA, Dev, and Tester are Cursor subagents in `.cursor/agents/`
 5. **Dev.** New chat. Type `@role-dev`, or choose `/role-dev` from the `/` menu, and the spec path. The agent implements the spec. It must not change the spec's acceptance criteria; if one looks wrong, it stops and tells you. After a later Phase 2 acceptance check, it addresses product bugs. One spec, one branch, one PR.
 6. **Tester Phase 2.** New chat. Type `@role-tester` Phase 2 acceptance check for `specs/NNN-name.md`. The agent checks each acceptance criterion against `git diff main`, runs lint, typecheck, and `npm test`, updates **Coverage matrix** status cells, and writes **Manual verification steps**. It does not edit tests or product source.
 7. **You: manual test.** Run the spec's Manual verification steps in the unpacked extension (under 5 minutes).
-8. **PR → CI → merge.** You open or review the PR. Workflow `CI` runs job `verify` and job `e2e` in parallel. Job `e2e` runs `npm run test:e2e`. The job summary lists flaky tests. A failed run uploads the HTML report, traces, and screenshots. You merge. After merge, append one row to `docs/agent-runs.csv`.
+8. **PR → CI → merge.** You open or review the PR. What CI runs is in `docs/testing.md`. You merge. After merge, append one row to `docs/agent-runs.csv`.
 
 `@project-core` is always on. The roles are subagents. They run when you invoke `@role-spec`, `@role-qa`, `@role-dev`, or `@role-tester`, or pick `/role-spec`, `/role-qa`, `/role-dev`, or `/role-tester` from the `/` menu. Outside `/feature`, when a subagent returns, the parent reports the result and stops.
 
 ## Commands
 
-| Command | What it does |
-|---|---|
-| `npm install` | Install from `package-lock.json` |
-| `npm run dev` | Rebuild `dist/` when source changes. Not a website. |
-| `npm run build` | Production build into `dist/` (pages, then interceptor, then bridge) |
-| `npm run lint` | ESLint |
-| `npm run typecheck` | `tsc --noEmit` for `src/` and for `e2e/` |
-| `npm test` | Playwright after a build. `dist/` must already exist. |
-| `npm run test:e2e` | Builds `dist/`, then runs the headless Playwright suite. |
+Commands are in the `AGENTS.md` command table.
 
 ## Example prompts
 

@@ -17,6 +17,14 @@ Invoke only when this subagent is requested with `@role-spec` or `/role-spec`. W
 8. Do not assign `e2e/**/*.spec.ts` to Dev.
 9. Stop after the spec file. Do not implement it.
 
+## Skills
+
+Read `.cursor/skills/apiresponsesimulator-conventions/SKILL.md` when writing a spec for this repo.
+
+Read `.cursor/skills/frontend-design/SKILL.md` when the spec changes popup or options UI.
+
+Read `.cursor/skills/release-checklist/SKILL.md` when the task is a version bump, the store ZIP, store listing or privacy text, or a GitHub release.
+
 ## DONE
 
 Done when `specs/NNN-*.md` is written. STOP. Print: "Next: new chat, @role-qa @specs/NNN-*.md". Touch no other file.
