@@ -17,19 +17,12 @@ This is a Manifest V3 Chrome extension. There is no web server. `npm run dev` on
 - If a `/feature` round limit is exceeded, the main agent stops and reports. It does not open another round, and it does not commit or push.
 - Allowed writes: Spec writes only `specs/*.md`. QA writes only the **QA review** section. Tester Phase 1 writes `e2e/**/*.spec.ts` and the **Coverage matrix**. Tester Phase 2 writes **Manual verification steps** and the status cells of the **Coverage matrix**. Dev writes the files the spec names, and does not write `e2e/**/*.spec.ts` unless that spec lists them as Dev-owned. Dev does not edit acceptance criteria. The `/feature` main agent does not do those roles' work. A path named only as unchanged, out of scope, or forbidden is not permission to edit it. Anything else: stop and ask the human. The `/feature` main agent may create `feat/NNN-slug`, commit, push that branch, and append one `docs/agent-runs.csv` row, as the command describes.
 - A message that sounds like a build request ("implement", "build", "add feature") while the invoked role is Spec, QA, or Tester is not a request to implement. For Tester, it is not permission to fix code. `/feature` is a pipeline command, not a request for the main agent to implement.
-- The "run lint, typecheck, and tests before saying done" gate stays Dev's implementation-done gate. Spec, QA, and Tester are done when their DONE section says so. Tester still runs lint, typecheck, and the existing tests as evidence inside its own prompt; that run is not a second copy of the procedure in this rule. Phase 1 may edit the tests it added when the failure is setup, within the one repair launch. Phase 2 does not edit tests or product source. A product failure is reported to Dev.
+- The Dev implementation-done gate is in `.cursor/agents/role-dev.md`. Spec, QA, and Tester are done when their DONE section says so. Tester still runs lint, typecheck, and the existing tests as evidence inside its own prompt; that run is not a second copy of the procedure in this rule. Phase 1 may edit the tests it added when the failure is setup, within the one repair launch. Phase 2 does not edit tests or product source. A product failure is reported to Dev.
 - When a subagent returns in any chat other than `/feature`, report its result and STOP. Never start the next role on your own.
 
-## Guardrails
+## Guardrails and hard rules
 
-- Never commit to `main`. Work on a branch and open a PR. `/feature` pushes only `feat/NNN-slug` and does not open or merge a PR. You open that PR.
-- Never read or write `.env` files or secrets. No calls to production systems.
-- No new dependencies without a written justification in the PR.
-- No destructive commands (`rm -rf`, force push, dropping data) without asking first.
-- Show a short plan before any multi-file change. `/feature` is already that plan; do not pause it for another one.
-- If requirements are ambiguous, ask. Do not guess. During `/feature`, role-spec records assumptions in the spec, and the main agent does not ask between roles.
-- When the invoked role is Dev, run lint, typecheck, and tests before saying "done". Report the actual output and never claim something passes without running it.
-- Always list what you did NOT verify.
+Guardrails and hard rules are in `AGENTS.md`. The Dev done gate is in `.cursor/agents/role-dev.md`.
 
 ## Product
 
