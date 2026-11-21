@@ -11,6 +11,7 @@ import {
 import { RuleList } from './components/RuleList'
 import { RuleForm } from './components/RuleForm'
 import { ImportExportButtons } from './components/ImportExportButtons'
+import { primaryButtonClass } from '../shared/ui'
 
 export function Options() {
   const [rules, setRules] = useState<MockRule[]>([])
@@ -69,47 +70,44 @@ export function Options() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-4xl mx-auto px-4 py-8">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">API Response Simulator</h1>
-            <p className="text-sm text-gray-500 mt-1">Manage your HTTP mock rules</p>
-          </div>
-          {!showForm && (
-            <div className="flex items-center gap-2">
-              <ImportExportButtons rules={rules} onImport={handleImport} />
-              <button
-                data-testid="add-rule"
-                onClick={handleAdd}
-                className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-              >
-                <span className="text-lg leading-none">+</span>
-                Add rule
-              </button>
+    <div className="min-h-screen bg-paper text-ink">
+      <div data-testid="options-column" className="mx-auto box-border w-[36rem] max-w-[36rem] border-0 p-0">
+        <div className="surface-frame px-6 pb-8 pt-8">
+          <header className="mb-6">
+            <h1 className="text-left text-title font-semibold text-ink">API Response Simulator</h1>
+            <p className="mt-2 text-meta text-secondary">Manage your HTTP mock rules</p>
+            {!showForm && (
+              <div className="mt-4 flex flex-wrap items-center gap-2">
+                <button
+                  data-testid="add-rule"
+                  type="button"
+                  onClick={handleAdd}
+                  className={primaryButtonClass}
+                >
+                  Add rule
+                </button>
+                <ImportExportButtons rules={rules} onImport={handleImport} />
+              </div>
+            )}
+          </header>
+
+          {showForm && (
+            <div className="mb-6">
+              <RuleForm
+                initialRule={editingRule}
+                onSave={handleSave}
+                onCancel={handleCancel}
+              />
             </div>
           )}
+
+          <RuleList
+            rules={rules}
+            onEdit={handleEdit}
+            onDelete={handleDelete}
+            onToggle={handleToggle}
+          />
         </div>
-
-        {/* Form */}
-        {showForm && (
-          <div className="mb-8">
-            <RuleForm
-              initialRule={editingRule}
-              onSave={handleSave}
-              onCancel={handleCancel}
-            />
-          </div>
-        )}
-
-        {/* Rule list */}
-        <RuleList
-          rules={rules}
-          onEdit={handleEdit}
-          onDelete={handleDelete}
-          onToggle={handleToggle}
-        />
       </div>
     </div>
   )

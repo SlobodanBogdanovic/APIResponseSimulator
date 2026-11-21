@@ -59,6 +59,7 @@ const KNOWN_TEST_IDS = new Set([
   'popup-rule-toggle',
   'open-settings',
   'add-rule',
+  'options-column',
   'export-rules',
   'import-rules',
   'import-file',
