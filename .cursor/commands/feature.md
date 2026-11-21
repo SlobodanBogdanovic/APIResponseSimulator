@@ -19,9 +19,9 @@ An early stop commits nothing and pushes nothing. Report the step, the round cou
 ## 0. Preconditions
 
 1. If `git status --porcelain` prints anything, including untracked files, stop. Do not stash.
-2. List `specs/*.md`. Skip `specs/_template.md`. `NNN` is one plus the highest three-digit prefix, zero-padded to 3. If none exist, `NNN` is `001`.
+2. List `specs/*.md`. Skip `specs/_template.md`. `NNN` is one plus the highest three-digit prefix, zero-padded to 3. If none exist, `NNN` is `001`. Two files with the same prefix count once. Do not pick another number. If `specs/<NNN>-*.md` already exists, report that path and stop.
 3. Build a slug from the idea: lowercase, letters and digits, words separated by single hyphens, no leading or trailing hyphen, at most 40 characters.
-4. The branch is `feat/NNN-slug`. The spec path is `specs/NNN-slug.md`. If that branch already exists, or that file exists, stop.
+4. The branch is `feat/NNN-slug`. The spec path is `specs/NNN-slug.md`. If that branch already exists, or that file exists, report the existing branch or file and stop. Do not pick another number.
 5. If local `main` does not exist, stop. Do not fetch or pull.
 6. From the clean tree, check out local `main`, then `git checkout -b feat/NNN-slug`. A clean checkout that is already `main` is allowed. Do this before any role launch.
 7. If `HEAD` is not `feat/NNN-slug`, stop. Do not commit or push on `main`.
