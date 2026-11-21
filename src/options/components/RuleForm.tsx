@@ -144,7 +144,7 @@ export function RuleForm({ initialRule, onSave, onCancel }: RuleFormProps) {
             </button>
           </div>
           {headers.length === 0 ? (
-            <p className="text-xs text-gray-400 italic">No custom headers. Content-Type: application/json is always added.</p>
+            <p className="text-xs text-gray-400 italic">No custom headers. Content-Type: application/json is always added. Example: x-debug: true.</p>
           ) : (
             <div className="space-y-2">
               {headers.map((row, idx) => (
@@ -154,7 +154,8 @@ export function RuleForm({ initialRule, onSave, onCancel }: RuleFormProps) {
                     type="text"
                     value={row.key}
                     onChange={(e) => updateHeader(idx, 'key', e.target.value)}
-                    placeholder="Header name"
+                    placeholder="x-debug"
+                    aria-label="Header name"
                     className="flex-1 rounded-lg border border-gray-300 px-3 py-1.5 text-sm text-gray-900 placeholder-gray-400 font-mono focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                   />
                   <input
@@ -162,7 +163,8 @@ export function RuleForm({ initialRule, onSave, onCancel }: RuleFormProps) {
                     type="text"
                     value={row.value}
                     onChange={(e) => updateHeader(idx, 'value', e.target.value)}
-                    placeholder="Value"
+                    placeholder="true"
+                    aria-label="Header value"
                     className="flex-1 rounded-lg border border-gray-300 px-3 py-1.5 text-sm text-gray-900 placeholder-gray-400 font-mono focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                   />
                   <button
