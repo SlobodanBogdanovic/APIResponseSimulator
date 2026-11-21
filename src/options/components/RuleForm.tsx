@@ -145,7 +145,7 @@ export function RuleForm({ initialRule, onSave, onCancel }: RuleFormProps) {
             </button>
           </div>
           {headers.length === 0 ? (
-            <p className="text-meta text-secondary">No custom headers. Content-Type: application/json is always added.</p>
+            <p className="text-meta text-secondary">No custom headers. Content-Type: application/json is always added. Example: x-debug: true.</p>
           ) : (
             <div className="flex flex-col gap-2">
               {headers.map((row, idx) => (
@@ -155,7 +155,7 @@ export function RuleForm({ initialRule, onSave, onCancel }: RuleFormProps) {
                     type="text"
                     value={row.key}
                     onChange={(e) => updateHeader(idx, 'key', e.target.value)}
-                    placeholder="Header name"
+                    placeholder="x-debug"
                     aria-label="Header name"
                     className={`${fieldClass} font-mono`}
                   />
@@ -164,8 +164,8 @@ export function RuleForm({ initialRule, onSave, onCancel }: RuleFormProps) {
                     type="text"
                     value={row.value}
                     onChange={(e) => updateHeader(idx, 'value', e.target.value)}
-                    placeholder="Value"
-                    aria-label="Value"
+                    placeholder="true"
+                    aria-label="Header value"
                     className={`${fieldClass} font-mono`}
                   />
                   <button

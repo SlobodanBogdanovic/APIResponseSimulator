@@ -626,7 +626,7 @@ test('AC-13: the rule form exposes its fields and the ink focus outline', async 
   await expectSecondary(options.getByTestId('cancel-rule'))
   await expect(options.getByTestId('add-header')).toHaveText('+ Add header')
   await expectSecondary(options.getByTestId('add-header'))
-  await expect(options.getByText('No custom headers. Content-Type: application/json is always added.', { exact: true })).toBeVisible()
+  await expect(options.getByText('No custom headers. Content-Type: application/json is always added. Example: x-debug: true.', { exact: true })).toBeVisible()
 
   for (const name of ['Name', 'URL pattern', 'Method', 'Status code', 'Response body', 'Delay (ms)']) {
     await expect(namedField(options, name)).toBeVisible()
@@ -635,7 +635,7 @@ test('AC-13: the rule form exposes its fields and the ink focus outline', async 
   await options.getByTestId('add-header').click()
   const header = options.getByTestId('header-row').last()
   await expect(header.getByRole('textbox', { name: 'Header name', exact: true })).toBeVisible()
-  await expect(header.getByRole('textbox', { name: 'Value', exact: true })).toBeVisible()
+  await expect(header.getByRole('textbox', { name: 'Header value', exact: true })).toBeVisible()
   await expect(header.getByRole('button', { name: 'Remove header', exact: true })).toBeVisible()
 
   await expectTabbedInkFocus(options, namedField(options, 'Name'))

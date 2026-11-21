@@ -67,12 +67,12 @@ Click **Add rule** and fill in the form:
 
 | Field | Example | Notes |
 |---|---|---|
-| Name | `Get timezone zone` | A label for yourself |
-| URL pattern | `localhost:8080/api/v1/lockerconf/datetime/zone` | See pattern syntax below |
-| Method | `POST` | Or `ANY` to match all methods |
+| Name | `List users` | A label for yourself |
+| URL pattern | `localhost:3000/api/v1/users` | See pattern syntax below. Host and port are an example. |
+| Method | `GET` | Or `ANY` to match all methods |
 | Status code | `200` | Any HTTP status 100–599 |
-| Response body | `{"zone": "Europe/London"}` | Any text or JSON string |
-| Response headers | *(optional)* | `Content-Type: application/json` is always included |
+| Response body | `[{"id": 1, "name": "Ada"}]` | Any text or JSON string |
+| Response headers | `x-debug: true` | `Content-Type: application/json` is always included |
 | Delay ms | `0` | Add artificial latency if needed |
 
 Click **Save rule**.
@@ -193,13 +193,15 @@ The export file format is:
   "rules": [
     {
       "id": "…",
-      "name": "Get timezone zone",
+      "name": "List users",
       "enabled": true,
       "method": "GET",
-      "urlPattern": "localhost:8080/api/v1/lockerconf/datetime/zone",
+      "urlPattern": "localhost:3000/api/v1/users",
       "statusCode": 200,
-      "responseBody": "{\"zone\":\"Europe/London\"}",
-      "responseHeaders": [],
+      "responseBody": "[{\"id\": 1, \"name\": \"Ada\"}]",
+      "responseHeaders": [
+        { "key": "x-debug", "value": "true" }
+      ],
       "delayMs": 0,
       "createdAt": 1714041600000
     }
@@ -244,18 +246,15 @@ The response body is returned as-is as a string. Make sure it matches what your 
 
 **JSON example:**
 ```json
-{
-  "zone": "Europe/London",
-  "offset": 1
-}
+[{"id": 1, "name": "Ada"}]
 ```
 
 **Error response example (status 422):**
 ```json
 {
   "error": "Validation failed",
-  "field": "zone",
-  "message": "Invalid timezone value"
+  "field": "name",
+  "message": "Name is required"
 }
 ```
 
