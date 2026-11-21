@@ -81,7 +81,7 @@ The longer map is in `docs/architecture.md`.
   when source or the manifest changes, and commit the result.
 - All storage operations go through `src/shared/storage.ts`. Do not call
   `chrome.storage.local` from React components. Storage functions return Promises.
-- One spec, one branch, one PR. Specs live in `specs/NNN-name.md`.
+- One spec, one branch, one PR. Specs live in `specs/NNN-name.md`. `NNN` is one plus the highest three-digit prefix in `specs/*.md`, skipping `specs/_template.md`, zero-padded to 3. Two files with the same prefix count once. If `specs/<NNN>-*.md` already exists, report that path and stop. Do not pick another number. Do not rename an existing spec.
 - Internal names stay: `MockRule`, storage keys `rules` and `settings`, bridge
   message source `__ninja_interceptor_bridge__`. Renaming them breaks installs
   or splits the bridge from the interceptor.

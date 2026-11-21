@@ -5,7 +5,7 @@ Human-gated. Spec, QA, Dev, and Tester are Cursor subagents in `.cursor/agents/`
 ## Flow
 
 1. **Idea.** You describe the change in a sentence or two.
-2. **Spec.** New chat. Type `@role-spec`, or choose `/role-spec` from the `/` menu, then the idea. The agent writes `specs/NNN-name.md` from `specs/_template.md` and stops. You edit or accept the draft. No code in this chat.
+2. **Spec.** New chat. Type `@role-spec`, or choose `/role-spec` from the `/` menu, then the idea. If the message says to revise an existing spec, the agent edits that file. Otherwise `NNN` is one plus the highest three-digit prefix in `specs/*.md`, skipping `specs/_template.md`, zero-padded to 3. Two files with the same prefix count once. If `specs/<NNN>-*.md` already exists, the agent reports that path and stops, and does not pick another number. Otherwise it writes `specs/NNN-name.md` from `specs/_template.md` and stops. You edit or accept the draft. No code in this chat.
 3. **QA requirements review.** New chat. Type `@role-qa`, or choose `/role-qa` from the `/` menu, and the spec path. The agent reviews the spec as a user advocate and writes findings into the spec's **QA review** section. Verdict: APPROVE or NEEDS CHANGES. You accept findings or send the spec back. No code, no new tests.
 4. **Tester Phase 1.** New chat. Type `@role-tester` Phase 1 for `specs/NNN-name.md`. The tester writes failing Playwright tests from the spec and fills **Coverage matrix**. It does not implement. `specs/003-improve-playwright-tests-coverage.md` is the exception: its Assumptions section has a line that, after trimming whitespace, is exactly Phase 1: skip. A code span does not count. That file skips Phase 1.
 5. **Dev.** New chat. Type `@role-dev`, or choose `/role-dev` from the `/` menu, and the spec path. The agent implements the spec. It must not change the spec's acceptance criteria; if one looks wrong, it stops and tells you. After a later Phase 2 acceptance check, it addresses product bugs. One spec, one branch, one PR.
@@ -41,7 +41,7 @@ One chat, from the idea to a pushed branch. Type `/feature` and the feature idea
 /feature Add a duplicate button on each rule card. The new rule starts disabled.
 ```
 
-The agent takes the next free `NNN` and skips `specs/_template.md`. With the specs in the repo today, that example uses branch `feat/002-duplicate-rule` and `specs/002-duplicate-rule.md`. The number is the next free one, not a fixed `002`.
+`NNN` is one plus the highest three-digit prefix in `specs/*.md`, skipping `specs/_template.md`, zero-padded to 3. Two files with the same prefix count once, so two `005` files make the next number `006`. If the message says to revise an existing spec, edit that file. If `specs/<NNN>-*.md` already exists, report that path and stop. Do not pick another number. The paths `feat/002-duplicate-rule` and `specs/002-duplicate-rule.md` show the shape of a name. A real run uses one plus the highest prefix.
 
 It creates `feat/NNN-slug` from local `main` before any role runs. A dirty tree, including untracked files, stops the run. It does not fetch, pull, or stash. It never pushes `main`, never merges, and never opens the PR.
 
