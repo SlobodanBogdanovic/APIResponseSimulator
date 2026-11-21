@@ -26,7 +26,7 @@ when files change. Load `dist/` as an unpacked extension.
 | Command | What it does |
 |---|---|
 | `npm install` | Install from `package-lock.json` |
-| `npm run icons` | Generate `public/icons/*.png` with jimp 0.22. Once, before the first build if icons are missing. |
+| `npm run icons` | Write solid-square PNGs with jimp 0.22. The shipped toolbar icons are the files in `assets/icons/`. |
 | `npm run dev` | Alias of `build:watch`. Rebuilds `dist/` on change. |
 | `npm run build` | Three Vite builds, in this order. Order matters. |
 | `npm run lint` | ESLint |

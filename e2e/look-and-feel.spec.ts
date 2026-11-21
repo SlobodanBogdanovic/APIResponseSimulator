@@ -23,8 +23,6 @@ const SIGNAL_PRESS = 'rgb(8, 74, 61)'
 const IDLE = 'rgb(110, 124, 138)'
 const DANGER = 'rgb(155, 35, 48)'
 const INDIGO = 'rgb(79, 70, 229)'
-const SIGNAL_HEX = '0B5F4E'
-const WHITE_HEX = 'FFFFFF'
 
 const usersRule: RuleInput = {
   name: 'Users',
@@ -713,12 +711,11 @@ test('AC-16: the switch thumb transition is at most 150ms and reduced motion is 
 
 test('AC-17: toolbar icons, badge, and tooltip', async ({ context, extensionId }) => {
   const options = await openOptions(context, extensionId)
-  expect(await iconPixel(options, 'icons/icon16.png', 0, 0)).toBe(`16:${SIGNAL_HEX}`)
-  expect(await iconPixel(options, 'icons/icon48.png', 0, 0)).toBe(`48:${SIGNAL_HEX}`)
-  expect(await iconPixel(options, 'icons/icon128.png', 0, 0)).toBe(`128:${SIGNAL_HEX}`)
-  expect(await iconPixel(options, 'icons/icon16.png', 3, 4)).toBe(`16:${WHITE_HEX}`)
-  expect(await iconPixel(options, 'icons/icon48.png', 9, 12)).toBe(`48:${WHITE_HEX}`)
-  expect(await iconPixel(options, 'icons/icon128.png', 24, 32)).toBe(`128:${WHITE_HEX}`)
+  expect(await iconPixel(options, 'icons/icon-16.png', 0, 0)).toBe('16:000000')
+  expect(await iconPixel(options, 'icons/icon-16.png', 2, 2)).toBe('16:4338C9')
+  expect(await iconPixel(options, 'icons/icon-48.png', 4, 8)).toBe('48:4338CA')
+  expect(await iconPixel(options, 'icons/icon-128.png', 64, 64)).toBe('128:4338CA')
+  expect(await iconPixel(options, 'icons/icon-16-off.png', 2, 2)).toBe('16:6B7280')
 
   const workerSource = await options.evaluate(async () => {
     const chromeApi = (globalThis as unknown as {
@@ -731,8 +728,13 @@ test('AC-17: toolbar icons, badge, and tooltip', async ({ context, extensionId }
     if (!workerPath) return ''
     return fetch(chromeApi.runtime.getURL(workerPath)).then((response) => response.text())
   })
-  const iconPaths = workerSource.match(/icons\/icon\d+\.png/g) ?? []
-  expect(new Set(iconPaths)).toEqual(new Set(['icons/icon16.png', 'icons/icon48.png', 'icons/icon128.png']))
+  const iconPaths = workerSource.match(/icons\/icon-\d+(?:-off)?\.png/g) ?? []
+  expect(new Set(iconPaths)).toEqual(new Set([
+    'icons/icon-16.png',
+    'icons/icon-32.png',
+    'icons/icon-16-off.png',
+    'icons/icon-32-off.png',
+  ]))
 
   const worker = extensionServiceWorker(context, extensionId)
   await expect.poll(async () => (await readExtensionState(worker)).badgeText).toBe('ON')
