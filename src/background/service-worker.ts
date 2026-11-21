@@ -10,13 +10,25 @@ function paintToolbarStatus(on: boolean): void {
   chrome.action.setTitle({
     title: on ? 'API Response Simulator: ON' : 'API Response Simulator: OFF',
   })
-  chrome.action.setIcon({
-    path: {
-      16: 'icons/icon16.png',
-      48: 'icons/icon48.png',
-      128: 'icons/icon128.png',
-    },
-  })
+  // Sizes 16 and 32 only. A throw, a rejected promise, or lastError stays
+  // swallowed. The badge and tooltip above already match `on`. Do not call
+  // setIcon again: an off value must not fall through to the colored paths.
+  const path = on
+    ? { 16: 'icons/icon-16.png', 32: 'icons/icon-32.png' }
+    : { 16: 'icons/icon-16-off.png', 32: 'icons/icon-32-off.png' }
+  try {
+    const returned: unknown = chrome.action.setIcon({ path }, () => {
+      void chrome.runtime.lastError
+    })
+    if (isThenable(returned)) {
+      void returned.then(
+        () => undefined,
+        () => undefined,
+      )
+    }
+  } catch {
+    // The icon call failed. Leave the badge and tooltip on `on`.
+  }
 }
 
 // Absent settings (never stored, deleted, or null) is ON. A present value uses

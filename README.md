@@ -42,9 +42,10 @@ After running `git pull` later on, click the **refresh icon** on the extension c
 
 ```bash
 npm install
-npm run icons
 npm run build
 ```
+
+The shipped toolbar glyphs are the files in `assets/icons/`. The build copies them into `dist/icons/`. `npm run icons` writes the old solid squares and is not part of the build.
 
 Then load the `dist` folder as above.
 
@@ -339,10 +340,9 @@ This split is necessary because `chrome.storage` is unreliable in the MAIN world
 # Install dependencies
 npm install
 
-# Generate icons (only needed once)
-npm run icons
-
-# Build (popup + options + service worker + content scripts)
+# Build (popup + options + service worker + content scripts).
+# The shipped glyphs come from assets/icons/ and the build copies them.
+# npm run icons writes the old solid squares and is not part of the build.
 npm run build
 
 # Build and watch for changes
