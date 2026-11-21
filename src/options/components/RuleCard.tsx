@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import type { MockRule } from '../../shared/types'
+import { PowerSwitch, confirmButtonClass, dangerButtonClass, secondaryButtonClass } from '../../shared/ui'
 
 interface RuleCardProps {
   rule: MockRule
@@ -8,13 +9,13 @@ interface RuleCardProps {
   onToggle: (id: string, enabled: boolean) => void
 }
 
-const METHOD_COLORS: Record<string, string> = {
-  GET:    'bg-green-100 text-green-700',
-  POST:   'bg-blue-100 text-blue-700',
-  PUT:    'bg-amber-100 text-amber-700',
-  DELETE: 'bg-red-100 text-red-700',
-  PATCH:  'bg-purple-100 text-purple-700',
-  ANY:    'bg-gray-100 text-gray-700',
+const METHOD_TEXT: Record<string, string> = {
+  GET: 'text-method-get',
+  POST: 'text-method-post',
+  PUT: 'text-method-put',
+  DELETE: 'text-method-delete',
+  PATCH: 'text-method-patch',
+  ANY: 'text-method-any',
 }
 
 export function RuleCard({ rule, onEdit, onDelete, onToggle }: RuleCardProps) {
@@ -27,74 +28,77 @@ export function RuleCard({ rule, onEdit, onDelete, onToggle }: RuleCardProps) {
   }
   const handleCancelDelete = () => setConfirming(false)
 
-  const methodColor = METHOD_COLORS[rule.method] ?? 'bg-gray-100 text-gray-700'
+  const methodText = METHOD_TEXT[rule.method] ?? 'text-method-any'
 
   return (
-    <div data-testid="rule-card" data-rule-name={rule.name} className={`bg-white rounded-xl border shadow-sm p-4 transition-opacity ${rule.enabled ? 'border-gray-200 opacity-100' : 'border-gray-100 opacity-60'}`}>
+    <div
+      data-testid="rule-card"
+      data-rule-name={rule.name}
+      className={`rule-card ${rule.enabled ? 'rule-card-live' : ''}`}
+    >
       <div className="flex items-start justify-between gap-3">
-        {/* Left: info */}
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 flex-wrap mb-1">
-            <span className={`inline-block px-2 py-0.5 rounded text-xs font-semibold ${methodColor}`}>
-              {rule.method}
-            </span>
-            <span className="text-xs font-medium text-gray-500 bg-gray-100 px-2 py-0.5 rounded">
-              {rule.statusCode}
-            </span>
-            <h3 className="text-sm font-semibold text-gray-900 truncate">{rule.name}</h3>
+        <div className="min-w-0 flex-1">
+          <div className="mb-2 flex items-baseline gap-2">
+            <span className={`text-ui font-medium ${methodText}`}>{rule.method}</span>
+            <span className="text-ui font-medium text-ink">{rule.statusCode}</span>
           </div>
-          <p className="text-xs text-gray-500 font-mono truncate">{rule.urlPattern}</p>
+          <h3 className={`truncate text-ui font-medium ${rule.enabled ? 'text-ink' : 'text-secondary'}`}>
+            {rule.name}
+          </h3>
+          <p className="truncate font-mono text-meta text-secondary">{rule.urlPattern}</p>
         </div>
-
-        {/* Right: toggle */}
-        <button
-          data-testid="rule-enabled-toggle"
-          onClick={() => onToggle(rule.id, !rule.enabled)}
-          className={`flex-shrink-0 relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${
-            rule.enabled ? 'bg-indigo-500' : 'bg-gray-300'
-          }`}
-          title={rule.enabled ? 'Disable rule' : 'Enable rule'}
-        >
+        <div className="flex shrink-0 items-center gap-2">
           <span
-            className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform ${
-              rule.enabled ? 'translate-x-6' : 'translate-x-1'
-            }`}
+            data-testid="rule-power"
+            className={`text-ui font-semibold ${rule.enabled ? 'text-signal' : 'text-ink'}`}
+          >
+            {rule.enabled ? 'On' : 'Off'}
+          </span>
+          <PowerSwitch
+            live={rule.enabled}
+            on={rule.enabled}
+            label={rule.enabled ? `Disable ${rule.name}` : `Enable ${rule.name}`}
+            testId="rule-enabled-toggle"
+            onClick={() => onToggle(rule.id, !rule.enabled)}
           />
-        </button>
+        </div>
       </div>
 
-      {/* Actions */}
-      <div className="flex items-center justify-between mt-3 pt-3 border-t border-gray-100">
-        <div className="flex items-center gap-3">
+      <div className="mt-3 flex items-center justify-between gap-3 border-t border-line pt-3">
+        <div className="flex flex-wrap items-center gap-2">
           <button
             data-testid="rule-edit"
+            type="button"
             onClick={() => onEdit(rule)}
-            className="text-xs text-indigo-600 hover:text-indigo-800 font-medium transition-colors"
+            className={secondaryButtonClass}
           >
             Edit
           </button>
           {!confirming ? (
             <button
               data-testid="rule-delete"
+              type="button"
               onClick={handleDeleteClick}
-              className="text-xs text-red-500 hover:text-red-700 font-medium transition-colors"
+              className={dangerButtonClass}
             >
               Delete
             </button>
           ) : (
-            <span className="flex items-center gap-2">
-              <span className="text-xs text-gray-600">Are you sure?</span>
+            <span className="flex flex-wrap items-center gap-2">
+              <span className="text-ui text-ink">Are you sure?</span>
               <button
                 data-testid="rule-delete-confirm"
+                type="button"
                 onClick={handleConfirm}
-                className="text-xs text-red-600 hover:text-red-800 font-semibold transition-colors"
+                className={confirmButtonClass}
               >
                 Confirm
               </button>
               <button
                 data-testid="rule-delete-cancel"
+                type="button"
                 onClick={handleCancelDelete}
-                className="text-xs text-gray-500 hover:text-gray-700 transition-colors"
+                className={secondaryButtonClass}
               >
                 Cancel
               </button>
@@ -102,7 +106,7 @@ export function RuleCard({ rule, onEdit, onDelete, onToggle }: RuleCardProps) {
           )}
         </div>
         {rule.delayMs > 0 && (
-          <span className="text-xs text-gray-400">{rule.delayMs}ms delay</span>
+          <span className="text-meta text-secondary">{rule.delayMs}ms delay</span>
         )}
       </div>
     </div>

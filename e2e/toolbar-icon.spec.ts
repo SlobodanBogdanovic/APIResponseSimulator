@@ -319,7 +319,7 @@ async function expectRuleTogglesLeaveIcon(
   await options.close()
   const refreshedOptions = await openExtensionPage(context, extensionId, 'options')
   const ruleToggle = ruleCard(refreshedOptions, 'Users').getByTestId('rule-enabled-toggle')
-  await expect(ruleToggle).toHaveAttribute('title', 'Enable rule')
+  await expect(ruleToggle).toHaveAttribute('aria-label', 'Enable Users')
   await ruleToggle.click()
   await expect.poll(async () => {
     const state = await readExtensionState(worker)

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import type { MockRule, ExtensionSettings } from '../shared/types'
 import { getRules, toggleRule, getSettings, saveSettings } from '../shared/storage'
+import { PowerSwitch, primaryButtonClass } from '../shared/ui'
 
 export function Popup() {
   const [rules, setRules] = useState<MockRule[]>([])
@@ -35,83 +36,91 @@ export function Popup() {
   if (loading) {
     return (
       <div className="flex items-center justify-center p-6">
-        <div className="text-sm text-gray-500">Loading…</div>
+        <p className="text-meta text-secondary">Loading…</p>
       </div>
     )
   }
 
+  const extensionOn = settings.extensionEnabled
+
   return (
-    <div className="flex flex-col min-h-0 bg-white">
-      {/* Header */}
-      <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 bg-indigo-600">
-        <span className="text-sm font-semibold text-white">API Response Simulator</span>
-        <button
-          data-testid="global-toggle"
-          onClick={handleGlobalToggle}
-          className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${
-            settings.extensionEnabled ? 'bg-indigo-300' : 'bg-gray-400'
-          }`}
-          title={settings.extensionEnabled ? 'Disable extension' : 'Enable extension'}
+    <div className="popup-shell flex min-h-0 flex-col bg-panel text-ink">
+      <div className="flex flex-nowrap items-center gap-2 border-b border-line px-3 py-3">
+        <span className="min-w-0 flex-1 truncate text-ui font-semibold text-ink">API Response Simulator</span>
+        <span
+          data-testid="extension-state"
+          className={`shrink-0 text-ui font-semibold ${extensionOn ? 'text-signal' : 'text-ink'}`}
         >
-          <span
-            className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform ${
-              settings.extensionEnabled ? 'translate-x-6' : 'translate-x-1'
-            }`}
-          />
-        </button>
+          {extensionOn ? 'On' : 'Off'}
+        </span>
+        <PowerSwitch
+          live={extensionOn}
+          on={extensionOn}
+          label={extensionOn ? 'Disable extension' : 'Enable extension'}
+          title={extensionOn ? 'Disable extension' : 'Enable extension'}
+          testId="global-toggle"
+          onClick={handleGlobalToggle}
+        />
       </div>
 
-      {/* Status */}
-      <div className="px-4 py-2 bg-gray-50 border-b border-gray-100">
-        <span className="text-xs text-gray-500">
+      <div className="flex flex-col gap-1 px-3 py-2">
+        <p className="text-meta font-semibold text-ink">
           {activeCount} of {rules.length} rule{rules.length !== 1 ? 's' : ''} active
-        </span>
-        {!settings.extensionEnabled && (
-          <span data-testid="extension-disabled" className="ml-2 text-xs text-amber-600 font-medium">(extension disabled)</span>
+        </p>
+        {!extensionOn && (
+          <p data-testid="extension-disabled" className="text-meta font-semibold text-ink">
+            (extension disabled)
+          </p>
         )}
       </div>
 
-      {/* Rule list */}
-      <div className="flex-1 overflow-y-auto max-h-64">
+      <div data-testid="popup-rule-list" className="max-h-64 overflow-y-auto px-3 py-2">
         {rules.length === 0 ? (
-          <div className="flex items-center justify-center p-6">
-            <p className="text-xs text-gray-400 text-center">
-              No rules yet.<br />Open settings to add one.
-            </p>
+          <div>
+            <p className="text-ui text-ink">No rules yet.</p>
+            <p className="text-meta text-secondary">Open settings to add one.</p>
           </div>
         ) : (
-          <ul className="divide-y divide-gray-100">
-            {rules.map((rule) => (
-              <li key={rule.id} data-testid="popup-rule" data-rule-name={rule.name} className="flex items-center justify-between px-4 py-2">
-                <div className="flex-1 min-w-0 mr-3">
-                  <p className="text-sm font-medium text-gray-800 truncate">{rule.name}</p>
-                  <p className="text-xs text-gray-400 truncate">{rule.urlPattern}</p>
-                </div>
-                <button
-                  data-testid="popup-rule-toggle"
-                  onClick={() => handleRuleToggle(rule.id, !rule.enabled)}
-                  className={`relative inline-flex h-5 w-9 flex-shrink-0 items-center rounded-full transition-colors focus:outline-none ${
-                    rule.enabled ? 'bg-indigo-500' : 'bg-gray-300'
-                  }`}
+          <ul className="flex flex-col gap-3">
+            {rules.map((rule) => {
+              const intercepting = extensionOn && rule.enabled
+              const powerClass = !extensionOn ? 'text-secondary' : rule.enabled ? 'text-signal' : 'text-ink'
+              return (
+                <li
+                  key={rule.id}
+                  data-testid="popup-rule"
+                  data-rule-name={rule.name}
+                  className={`popup-row flex items-center justify-between gap-2 py-1 ${intercepting ? 'popup-row-live' : ''}`}
                 >
-                  <span
-                    className={`inline-block h-3 w-3 transform rounded-full bg-white shadow transition-transform ${
-                      rule.enabled ? 'translate-x-5' : 'translate-x-1'
-                    }`}
+                  <div className="min-w-0 flex-1">
+                    <p className={`truncate text-ui font-medium ${intercepting ? 'text-ink' : 'text-secondary'}`}>
+                      {rule.name}
+                    </p>
+                    <p className="truncate font-mono text-meta text-secondary">{rule.urlPattern}</p>
+                  </div>
+                  <span data-testid="rule-power" className={`shrink-0 text-ui font-semibold ${powerClass}`}>
+                    {rule.enabled ? 'On' : 'Off'}
+                  </span>
+                  <PowerSwitch
+                    live={intercepting}
+                    on={rule.enabled}
+                    label={rule.enabled ? `Disable ${rule.name}` : `Enable ${rule.name}`}
+                    testId="popup-rule-toggle"
+                    onClick={() => handleRuleToggle(rule.id, !rule.enabled)}
                   />
-                </button>
-              </li>
-            ))}
+                </li>
+              )
+            })}
           </ul>
         )}
       </div>
 
-      {/* Footer */}
-      <div className="px-4 py-3 border-t border-gray-200">
+      <div className="border-t border-line p-3">
         <button
           data-testid="open-settings"
+          type="button"
           onClick={handleOpenSettings}
-          className="w-full text-sm text-center text-indigo-600 hover:text-indigo-800 font-medium transition-colors"
+          className={`${primaryButtonClass} w-full`}
         >
           Open settings
         </button>
