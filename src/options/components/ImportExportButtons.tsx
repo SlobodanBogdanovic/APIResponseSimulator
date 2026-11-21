@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import type { MockRule } from '../../shared/types'
+import { secondaryButtonClass } from '../../shared/ui'
 
 interface ImportExportButtonsProps {
   rules: MockRule[]
@@ -184,13 +185,11 @@ export function ImportExportButtons({ rules, onImport }: ImportExportButtonsProp
   const canExport = rules.length > 0
 
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex flex-wrap items-center gap-2">
       {status && (
         <span
           data-testid="import-export-status"
-          className={`text-xs font-medium ${
-            status.kind === 'success' ? 'text-green-600' : 'text-red-600'
-          }`}
+          className={`text-meta ${status.kind === 'success' ? 'text-signal' : 'text-danger'}`}
           role="status"
         >
           {status.message}
@@ -198,17 +197,19 @@ export function ImportExportButtons({ rules, onImport }: ImportExportButtonsProp
       )}
       <button
         data-testid="export-rules"
+        type="button"
         onClick={handleExport}
         disabled={!canExport}
-        className="px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+        className={secondaryButtonClass}
         title={canExport ? 'Download rules as JSON' : 'No rules to export'}
       >
         Export
       </button>
       <button
         data-testid="import-rules"
+        type="button"
         onClick={handleImportClick}
-        className="px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+        className={secondaryButtonClass}
         title="Import rules from a JSON file"
       >
         Import
