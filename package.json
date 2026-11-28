@@ -11,11 +11,12 @@
     "typecheck": "tsc --noEmit && tsc --noEmit -p tsconfig.e2e.json",
     "test": "playwright test",
     "test:e2e": "npm run build && playwright test",
-    "test:e2e:reverse": "npm run build && playwright test e2e/smoke.spec.ts e2e/rules.spec.ts e2e/persistence.spec.ts e2e/intercept.spec.ts e2e/import-export.spec.ts e2e/edge.spec.ts"
+    "test:e2e:reverse": "npm run build && playwright test e2e/smoke.spec.ts e2e/rules.spec.ts e2e/persistence.spec.ts e2e/intercept.spec.ts e2e/import-export.spec.ts e2e/edge.spec.ts",
+    "package": "npm run build && node scripts/package-extension.mjs"
   },
   "keywords": [],
   "author": "",
-  "license": "ISC",
+  "license": "MIT",
   "type": "module",
   "dependencies": {
     "react": "^19.2.5",

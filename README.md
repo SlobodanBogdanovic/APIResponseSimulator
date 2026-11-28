@@ -49,6 +49,14 @@ The shipped toolbar glyphs are the files in `assets/icons/`. The build copies th
 
 Then load the `dist` folder as above.
 
+### Store zip
+
+```bash
+npm run package
+```
+
+This builds `dist/` and writes `api-response-simulator-<version>.zip` next to `package.json`. `manifest.json` is at the root of the zip. The zip is not committed. The Chrome Web Store listing is not submitted. See `PRIVACY.md` and `docs/chrome-web-store.md`.
+
 ---
 
 ## Quick start — mock your first request
@@ -355,6 +363,9 @@ npm test
 
 # Build and run the suite headless
 npm run test:e2e
+
+# Build the Chrome Web Store zip (not committed)
+npm run package
 ```
 
 After any code change: run `npm run build`, then click the **refresh icon** on the extension card in `chrome://extensions`, and reload your app tab.

@@ -1,0 +1,8 @@
+title = "API Response Simulator"
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Vendored Playwright skill sample. The string is a fake verification token in a documentation code block."
+regexes = ['''test-verification-abc123''']

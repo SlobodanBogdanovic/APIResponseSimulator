@@ -33,6 +33,7 @@ when files change. Load `dist/` as an unpacked extension.
 | `npm run typecheck` | `tsc --noEmit` for `src/`, then for `e2e/` |
 | `npm test` | Playwright after a build. `dist/` must already exist. |
 | `npm run test:e2e` | Builds `dist/`, then runs the headless Playwright suite. |
+| `npm run package` | Runs `npm run build`, then writes `api-response-simulator-<version>.zip` from `dist/` with `manifest.json` at the archive root. The zip is not committed. |
 
 `npm run build` is:
 
